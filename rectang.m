@@ -1,0 +1,23 @@
+function table=rectang(l,w,to)
+global table
+table=[];
+table{1,1}=inline(['-t+',num2str(w/2+to)]);
+table{1,2}=inline(num2str(-l/2),'t');
+table{1,3}=to;
+table{1,4}=table{1,3}+w;
+table{1,5}=1;
+table{2,1}=inline(num2str(-w/2),'t');
+table{2,2}=inline([num2str(-table{1,4}-l/2),'+t']);
+table{2,3}=table{1,4};
+table{2,4}=table{2,3}+l;
+table{2,5}=1;
+table{3,1}=inline([num2str(-w/2-table{2,4}),'+t',]);
+table{3,2}=inline(num2str(l/2),'t');
+table{3,3}=table{2,4};
+table{3,4}=table{3,3}+w;
+table{3,5}=1;
+table{4,1}=inline(num2str(w/2),'t');
+table{4,2}=inline([num2str(l/2+table{3,4}),'-t']);
+table{4,3}=table{3,4};
+table{4,4}=table{4,3}+l;
+table{4,5}=1;
