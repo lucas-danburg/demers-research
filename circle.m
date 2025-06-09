@@ -11,7 +11,3 @@ end
 table{1,3}=to;
 table{1,4}=2*pi*r+to;
 table{1,5}=2;
-
-%will waas here
-
-%aaaaahi
