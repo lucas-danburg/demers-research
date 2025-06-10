@@ -1,4 +1,4 @@
-function table=sinai(w, r, to)
+function table=sinai(w, r, rho, to)
 table = cell(8,5);
 
 % 1. Bottom edge (left to right)
@@ -58,14 +58,14 @@ table{8,4} = 3*pi/2;
 table{8,5} = 2;
 
 if to==0
-    table{9,1}=inline([num2str(r),'*cos(t/',num2str(r),')']);
-    table{9,2}=inline([num2str(-r),'*sin(t/',num2str(r),')']);
+    table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
+    table{9,2}=inline([num2str(-rho),'*sin(t/',num2str(rho),')']);
 else
-    table{9,1}=inline([num2str(r),'*cos((t-',num2str(to),')/',num2str(r), ')']);
-    table{9,2}=inline([num2str(-r),'*sin((t-',num2str(to),')/',num2str(r),')']);
+    table{9,1}=inline([num2str(rho),'*cos((t-',num2str(to),')/',num2str(rho), ')']);
+    table{9,2}=inline([num2str(-rho),'*sin((t-',num2str(to),')/',num2str(rho),')']);
 end
 table{9,3}=to;
-table{9,4}=2*pi*r+to;
+table{9,4}=2*pi*rho+to;
 table{9,5}=2;
 
 hold on;
