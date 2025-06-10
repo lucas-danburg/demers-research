@@ -429,7 +429,12 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 		else
 			kaplan(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),str2num(get(handles.param3e,'String')),get(handles.extraoptions,'Value'),0);
 		end
-
+    case 17  %sinai TEMPORARY
+        if handles.tables
+            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),handles.to);
+        else
+            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),0);
+        end
     end
     
     handles.table=table;
@@ -664,7 +669,10 @@ case 16 %kaplan billiard
 	set(handles.param1l,'String','Side Length')
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
-case 17 %Custom table
+case 17  %Sinai TEMPORARY
+    set(handles.param1l,'String','Width of square')
+    set(handles.param2l,'String','Radius of circle')
+case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
 end
@@ -1142,6 +1150,9 @@ case 3  %graph of Lyapunov Exponent for Different Billiard domains
             r=str2num(get(handles.param3e,'String'));
             option=get(handles.extraoptions,'Value');
             kaplanlyap(r,option,derivComp,nmax,raw)
+        case 17 %run sinailyap TEMPORARY if the domain is sinai TEMPORARY
+            r=str2num(get(handles.param2e,'String'));
+            sinailyapTEMPORARY(r,derivComp,nmax,raw)
        
     end
 case 4  %phase space:  s vs incident angle
@@ -1440,6 +1451,9 @@ case 2  %type of data: positive lyapunov exponents
             r=str2num(get(handles.param3e,'String'));
             option=get(handles.extraoptions,'Value');
             limArr=kaplanlyap(r,option,derivComp,nmax,raw);
+        case 16 %run sinailyap TEMPORARY if the domain is sinai
+            r=str2num(get(handles.param2e,'String'));
+            limArr=sinailyapTEMPORARY(r,derivComp,nmax,raw);
 
     end
     if get(handles.radio1,'Value')==1 && domain~=5 && domain~=11 && domain~=12 %save data
