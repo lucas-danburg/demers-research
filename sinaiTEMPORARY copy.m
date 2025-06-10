@@ -1,0 +1,50 @@
+function table=sinai(w,r,to)
+global table
+table=[];
+table{1,1}=inline(['-t+',num2str(0.5-r + to)]);
+table{1,2}=inline(num2str(-0.5+r),'t');
+table{1,3}=to;
+table{1,4}=table{1,3} + 1-2*r;
+table{1,5}=1;
+table{2,1} = inline([num2str(w/2 - r), '+', num2str(r), '*cos(t)']);
+table{2,2} = inline([num2str(-w/2 + r), '+', num2str(r), '*sin(t)']);
+table{2,3}=table{1,4};
+table{2,4}=table{2,3} + pi/2*r + to;
+table{2,5}=2;
+table{3,1}=inline(num2str(-0.5+r),'t');
+table{3,2}=inline([num2str(-table{2,4}-0.5+r),'+t']);
+table{3,3}=table{2,4};
+table{3,4}=table{3,3} + 1-2*r;
+table{3,5}=1;
+table{4,1} = inline([num2str(w/2 - r), '+', num2str(r), '*cos(t)']);
+table{4,2} = inline([num2str(w/2 - r), '+', num2str(r), '*sin(t)']);
+table{4,3}=table{3,4};
+table{4,4}=table{4,3} + pi/2*r + to;
+table{4,5}=2;
+table{5,1}=inline([num2str(-0.5+r - table{4,4}),'+t',]);
+table{5,2}=inline(num2str(0.5-r),'t');
+table{5,3}=table{4,4};
+table{5,4}=table{5,3} + 1-2*r;
+table{5,5}=1;
+table{6,1} = inline([num2str(-w/2 + r), '+', num2str(r), '*cos(t)']);
+table{6,2} = inline([num2str(w/2 - r), '+', num2str(r), '*sin(t)']);
+table{6,3}=table{5,4};
+table{6,4}=table{6,3}+ pi/2*r + to;
+table{6,5}=2;
+table{7,1}=inline(num2str(0.5-r),'t');
+table{7,2}=inline([num2str(table{6,4} + 0.5-r),'-t']);
+table{7,3}=table{6,4};
+table{7,4}=table{7,3} + 1-2*r + to;
+table{7,5}=1;
+table{8,1} = inline([num2str(-w/2 + r), '+', num2str(r), '*cos(t)']);
+table{8,2} = inline([num2str(-w/2 + r), '+', num2str(r), '*sin(t)']);
+table{8,3}=table{7,4};
+table{8,4}=table{8,3} + pi/2*r + to;
+table{8,5}=2;
+
+
+
+for n=1:8
+    ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
+    hold on;
+end
