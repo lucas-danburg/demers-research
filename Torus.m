@@ -1,7 +1,7 @@
-function table = torus(R, r, t0)
+function table = torus(R, r, to)
 //R = Major radius
 //r = minor radius
-//t0 = initial time
+//to = initial time
 
 global table
 table = [];
@@ -9,8 +9,8 @@ table = [];
 //  1.
 table{1, 1} = @(t) t;
 table{1, 2} = @(t) 0;
-table{1, 3} = t0;
-table{1, 4} = t0 + 2*pi;
+table{1, 3} = to;
+table{1, 4} = to + 2*pi;
 table{1, 5} = 1;
 
 //  2.
