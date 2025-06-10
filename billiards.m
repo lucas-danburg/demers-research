@@ -26,7 +26,7 @@ function varargout = billiards(varargin)
 %    FIG = BILLIARDS launch billiards BILLIARDS.
 %    BILLIARDS('callback_name', ...) invoke the named callback.
 
-% Last Modified by GUIDE v2.5 11-Jun-2020 13:58:03
+% Last Modified by GUIDE v2.5 10-Jun-2025 11:34:12
 if nargin == 0  % LAUNCH GUI
    
 	fig = openfig(mfilename,'reuse');
@@ -108,6 +108,7 @@ set(handles.run,'Visible','on')
 set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
+%set(handles.radiobutton9, 'Visible','on')
 set(handles.inite3,'String','')
 set(handles.inite3,'Visible','on')
 set(handles.inite2,'String','')
@@ -188,6 +189,7 @@ set(handles.cy,'Visible','off')
 set(handles.init,'Visible','off')
 set(handles.initradio1,'Visible','off')
 set(handles.initradio2,'Visible','off')
+%set(handles.radiobutton9, 'Visible','off')
 set(handles.inite3,'Visible','off')
 set(handles.inite2,'Visible','off')
 set(handles.initl3,'Visible','off')
@@ -862,23 +864,34 @@ syms t  %make t a symbolic variable
 
 %set initial values for x, y, and angle
 if get(handles.initradio1,'Value')==1   %if initial conditions are entered with x/y
-    xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
-    yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
-    ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
+    % temporary for testing generation
+    if get(handles.inite1, 'String') == 'generate'
+
+
+    else
+        xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
+        yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
+        ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
+    end
+
+% TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
     to=str2num(get(handles.inite1,'String'));    %entered initial t value
     iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
     
     xo=table{piece(to),1}(to);    %get xo from entered value of to
     yo=table{piece(to),2}(to);    %get yo from entered value of to
-    
+
     x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
     y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
     at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+    at=double(at)
     ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
-    if ao>pi   %make angle between -pi and pi if not
+    if (ao>pi)   %make angle between -pi and pi if not
         ao=ao-2*pi;
     end
+
+% TODO: else for generate IC
 end
    
 nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
@@ -908,6 +921,7 @@ set(handles.cy,'Visible','off')
 set(handles.init,'Visible','off')
 set(handles.initradio1,'Visible','off')
 set(handles.initradio2,'Visible','off')
+%set(handles.radiobutton9,'Visible','off')
 set(handles.inite3,'Visible','off')
 set(handles.inite2,'Visible','off')
 set(handles.initl3,'Visible','off')
@@ -961,6 +975,7 @@ guidata(gcbo,handles);
 global derivComp    %table of components needed for derivative of the billiard map
 derivComp=zeros(nmax,4);   
 
+% for each initial condition
 while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
     derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
     derivComp(n,2)=yo;
@@ -1615,6 +1630,7 @@ set(handles.run,'Visible','on')
 set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
+%set(handles.radiobutton9,'Visible','on')
 if get(handles.initradio1,'Value')+get(handles.initradio2,'Value')==1   %if either x,y or t coordinates are selected for entering initial conditions
     set(handles.inite3,'String','')
     set(handles.inite3,'Visible','on')
@@ -1623,6 +1639,8 @@ if get(handles.initradio1,'Value')+get(handles.initradio2,'Value')==1   %if eith
     set(handles.inite1,'String','')
     set(handles.inite1,'Visible','on')
     set(handles.initl1,'Visible','on')
+
+    % TODO: something here
     if get(handles.initradio2,'Value')==1   %if t method is selected
         set(handles.inite2,'Visible','off') %turn off 2nd parameter since it is not needed
         set(handles.initl2,'Visible','off')
@@ -1952,6 +1970,8 @@ for k=1:size(handles.data,2)
     plot(handles.data{k}(:,1),handles.data{k}(:,3),['.',color(k)])  %plot all of the calculated data in phase space (using a different color for each set of initial conditions)
     hold on
 end
+
+% here are the phase space bounds
 axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])    %set axis for phase space
 for n=1:size(handles.table,1)-1
     line([handles.table{n,4},handles.table{n,4}],[-pi/2,pi/2])  %draw vertical lines to divide up phase space into pieces
@@ -1968,6 +1988,7 @@ set(handles.inite3,'String',num2str(initc(2)))  %enter angle into edit fields
 function initradio1_Callback(hObject, eventdata, handles)
 set(handles.initradio1,'Value',1)
 set(handles.initradio2,'Value',0)
+%set(handles.radiobutton9,'Value',0)
 set(handles.inite1,'Visible','on')
 set(handles.inite2,'Visible','on')
 set(handles.inite3,'Visible','on')
@@ -1983,6 +2004,7 @@ set(handles.initphase,'Visible','off')
 function initradio2_Callback(hObject, eventdata, handles)
 set(handles.initradio2,'Value',1)
 set(handles.initradio1,'Value',0)
+%set(handles.radiobutton9,'Value',0)
 set(handles.inite1,'Visible','on')
 set(handles.inite2,'Visible','off')
 set(handles.inite3,'Visible','on')
