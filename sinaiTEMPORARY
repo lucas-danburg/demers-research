@@ -1,4 +1,4 @@
-function table=sinai(w, r)
+function table=sinai(w, r, to)
 table = cell(8,5);
 
 % 1. Bottom edge (left to right)
