@@ -854,9 +854,20 @@ set(handles.add,'Visible','off')
 % --------------------------------------------------------------------
 function varargout = run_Callback(h, eventdata, handles, varargin)
 %called when run button is pressed for simulations
+
+if strcmp(get(handles.tablepopup,'Visible'),'on')   %if new table was created reset data and initial conditions
+    handles.data={};
+    handles.initcond={};
+end
+
+% for lucas edits, these three will be placed in a cell array
+% that contains multiple initial conditions
 global xo   %x-coordinate of last intersection
 global yo   %y-coordiante of last intersection
 global ao   %horizontal angle of last intersection
+
+% these variables will not go in the array because they stay
+% the same for all initial conditions
 global nmax %maximum number of iterations
 global table
 global t
@@ -864,36 +875,50 @@ syms t  %make t a symbolic variable
 
 %set initial values for x, y, and angle
 if get(handles.initradio1,'Value')==1   %if initial conditions are entered with x/y
-    % temporary for testing generation
-    if get(handles.inite1, 'String') == 'generate'
+    xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
+    yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
+    ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
-
-    else
-        xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
-        yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
-        ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
-    end
+    handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
-    to=str2num(get(handles.inite1,'String'));    %entered initial t value
-    iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
-    
-    xo=table{piece(to),1}(to);    %get xo from entered value of to
-    yo=table{piece(to),2}(to);    %get yo from entered value of to
+    % temporary for testing generation
+    if get(handles.inite1, 'String') == 'generate'
+        % phase space bounds
+        %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
+        
+        npts = 10; % this will become user input
 
-    x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
-    y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
-    at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
-    at=double(at)
-    ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
-    if (ao>pi)   %make angle between -pi and pi if not
-        ao=ao-2*pi;
+        % generating t values between to and tmax
+        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, npts);
+
+        % generate angle values from -pi/2 to pi/2
+        iangles = linspace(-pi/2, pi/2, npts);
+        % gotta do something w these eventually
+
+        handles.initcond{1}=[1, 1, pi/3];
+        handles.initcond{2}=[1, 1, pi/4];
+
+    else
+        to=str2num(get(handles.inite1,'String'));    %entered initial t value
+        iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
+        
+        xo=table{piece(to),1}(to);    %get xo from entered value of to
+        yo=table{piece(to),2}(to);    %get yo from entered value of to
+
+        x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
+        y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
+        at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+        at=double(at);
+        ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
+        if (ao>pi)   %make angle between -pi and pi if not
+            ao=ao-2*pi;
+        end
+
+        handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
     end
-
-% TODO: else for generate IC
 end
-   
 nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
 if handles.tables   %if saved table is present
     handles.table=[handles.stable;handles.table];   %merge saved and current tables
@@ -901,10 +926,6 @@ if handles.tables   %if saved table is present
 end
 table=handles.table;
 cla %clear preview
-if strcmp(get(handles.tablepopup,'Visible'),'on')   %if new table was created reset data and initial conditions
-    handles.data={};
-    handles.initcond={};
-end
 
 set(handles.preview,'Visible','off')
 set(handles.frame1,'Visible','off')
@@ -950,58 +971,66 @@ set(handles.stop,'Visible','on')    %turn on cancel button to stop iterations
 set(handles.stopl,'Visible','on')   %turn on label for cancel button
 set(handles.stopl,'String',['0/',num2str(nmax),' iterations completed'])    %set label for # iterations completed
 drawnow %force Matlab to update the GUI display
-handles.initcond{end+1}=[xo,yo,ao]; %save initial conditions for later use
 guidata(gcbo,handles);
 
-%d is initl3 of tangent line for each piece (d is a vector of functions of t)
-deriv=sym(zeros(size(table,1),1));
-for m=1:size(table,1)
-    x=eval(char(table{m,1}));   %symbolic function for x(t)
-    y=eval(char(table{m,2}));   %symbolic function for y(t)
-    deriv(m,1)=atan(diff(y,t)/diff(x,t));
+% FOR LOOP START (?)
+for initcondi = handles.initcond
+    initcondi = initcondi{1};
+    xo = initcondi(1);
+    yo = initcondi(2);
+    ao = initcondi(3);
+
+    %d is initl3 of tangent line for each piece (d is a vector of functions of t)
+    deriv=sym(zeros(size(table,1),1));
+    for m=1:size(table,1)
+        x=eval(char(table{m,1}));   %symbolic function for x(t)
+        y=eval(char(table{m,2}));   %symbolic function for y(t)
+        deriv(m,1)=atan(diff(y,t)/diff(x,t));
+    end
+    data=zeros(nmax,4); %allocate space for all data
+    n=1;    %n is current iteration being calculated
+    iterate %calculates the 1st iteration based upon the initial conditions
+
+
+    % TODO: edit this for output printing
+    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
+    set(handles.stopl,'Visible','on')   %display cancel label
+    drawnow
+    handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
+    guidata(gcbo,handles);
+
+    global derivComp    %table of components needed for derivative of the billiard map
+    derivComp=zeros(nmax,4);   
+
+    % for each initial condition
+    while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
+        derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
+        derivComp(n,2)=yo;
+        derivComp(n,3)=data(n,3);
+        derivComp(n,4)=data(n,4);
+
+        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
+        n=n+1;
+        drawnow %force Matlab to update the GUI display
+        handles=guidata(gcbo);
+        xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
+        yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
+        ao=data(n-1,2); %horizontal angle of last intersection
+        
+        iterate
+        %try
+        %    iterate %find the location and angle of the next collision
+        %catch   %if error in iterate then run the following:
+        %    'iterate error' %error message
+        %    handles.done=1;   %prevents further calculations due to error
+        %end    
+    end
+
+    data=data(1:n,:);   %delete the rows of data that were not calculated
+    handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
+    guidata(gcbo,handles);
 end
-data=zeros(nmax,4); %allocate space for all data
-n=1;    %n is current iteration being calculated
-iterate %calculates the 1st iteration based upon the initial conditions
-
-
-
-set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
-set(handles.stopl,'Visible','on')   %display cancel label
-drawnow
-handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
-guidata(gcbo,handles);
-
-global derivComp    %table of components needed for derivative of the billiard map
-derivComp=zeros(nmax,4);   
-
-% for each initial condition
-while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
-    derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
-    derivComp(n,2)=yo;
-    derivComp(n,3)=data(n,3);
-    derivComp(n,4)=data(n,4);
-
-    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
-    n=n+1;
-    drawnow %force Matlab to update the GUI display
-    handles=guidata(gcbo);
-    xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
-    yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
-    ao=data(n-1,2); %horizontal angle of last intersection
-    
-    
-    try
-        iterate %find the location and angle of the next collision
-    catch   %if error in iterate then run the following:
-        'iterate error' %error message
-        handles.done=1;   %prevents further calculations due to error
-    end    
-end
-
-data=data(1:n,:);   %delete the rows of data that were not calculated
-handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
-guidata(gcbo,handles);
+% END FOR LOOP
 
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
