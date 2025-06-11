@@ -73,15 +73,6 @@ elseif ischar(varargin{1}) % INVOKE NAMED SUBFUNCTION OR CALLBACK
 	end
 end
 
-global torus % TORUS
-if exist('torus','var') && strcmp(torus,'torus') % TORUS
-    isTorus = true; % TORUS
-end% Example: set torus based on GUI or user input % TORUS
-% If you have a GUI checkbox or dropdown for torus, set it like this: % TORUS
-if get(handles.torusCheckbox,'Value') == 1 % TORUS
-    torus = 'torus'; % TORUS
-end % TORUS
-
 
 % --------------------------------------------------------------------
 function varargout = newtable_Callback(h, eventdata, handles, varargin)
