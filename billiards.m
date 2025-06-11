@@ -27,6 +27,15 @@ function varargout = billiards(varargin)
 %    BILLIARDS('callback_name', ...) invoke the named callback.
 
 % Last Modified by GUIDE v2.5 10-Jun-2025 11:34:12
+global torus % TORUS
+if exist('torus','var') && strcmp(torus,'torus') % TORUS
+    isTorus = true; % TORUS
+end% Example: set torus based on GUI or user input % TORUS
+% If you have a GUI checkbox or dropdown for torus, set it like this: % TORUS
+if get(handles.torusCheckbox,'Value') == 1 % TORUS
+    torus = 'torus'; % TORUS
+end % TORUS
+
 if nargin == 0  % LAUNCH GUI
    
 	fig = openfig(mfilename,'reuse');
