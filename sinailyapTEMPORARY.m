@@ -3,7 +3,7 @@
 %billiard tables
 %
 
-function limArr=sinailyap(r,derivComp,n,raw)
+function limArr=sinailyapTEMPORARY(r,derivComp,n,raw)
 
 derivTable=zeros(n,4);  %declare the table containing the derivative matrices
 vecprod=zeros(n,2); %table containing the growing vector DT(x)v
