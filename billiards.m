@@ -974,6 +974,8 @@ drawnow %force Matlab to update the GUI display
 guidata(gcbo,handles);
 
 % FOR LOOP START (?)
+condit_n = 1;
+max_condits = size(handles.initcond, 2);
 for initcondi = handles.initcond
     initcondi = initcondi{1};
     xo = initcondi(1);
@@ -993,7 +995,7 @@ for initcondi = handles.initcond
 
 
     % TODO: edit this for output printing
-    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
+    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
     drawnow
     handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
@@ -1009,7 +1011,7 @@ for initcondi = handles.initcond
         derivComp(n,3)=data(n,3);
         derivComp(n,4)=data(n,4);
 
-        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
+        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
         n=n+1;
         drawnow %force Matlab to update the GUI display
         handles=guidata(gcbo);
@@ -1029,6 +1031,8 @@ for initcondi = handles.initcond
     data=data(1:n,:);   %delete the rows of data that were not calculated
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
     guidata(gcbo,handles);
+
+    condit_n = condit_n + 1;
 end
 % END FOR LOOP
 
