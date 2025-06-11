@@ -73,6 +73,15 @@ elseif ischar(varargin{1}) % INVOKE NAMED SUBFUNCTION OR CALLBACK
 	end
 end
 
+global torus % TORUS
+if exist('torus','var') && strcmp(torus,'torus') % TORUS
+    isTorus = true; % TORUS
+end% Example: set torus based on GUI or user input % TORUS
+% If you have a GUI checkbox or dropdown for torus, set it like this: % TORUS
+if get(handles.torusCheckbox,'Value') == 1 % TORUS
+    torus = 'torus'; % TORUS
+end % TORUS
+
 
 % --------------------------------------------------------------------
 function varargout = newtable_Callback(h, eventdata, handles, varargin)
@@ -897,17 +906,49 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        npts = 10; % this will become user input
+        npts = 3; % this will become user input
+
+        % TODO: modify npts and trim edges
+        % TODO: verify current multiple initial condition support
+        % TODO: fix left side printout option bugs
+        % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
+
+        % TODO (?): billiard table is equivilent to trajectories on a certain topology?
 
         % generating t values between to and tmax
-        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, npts);
+        % we generate two additional values (the endpoints) and then remove them
+        % this improves the distribution of points
+        % it also prevents incident angles of +/- pi/2, which would cause trajectories
+        % to exit the table
+        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, npts + 2);
+        ts = ts(2:end - 1);
 
         % generate angle values from -pi/2 to pi/2
-        iangles = linspace(-pi/2, pi/2, npts);
-        % gotta do something w these eventually
+        iangles = linspace(-pi/2, pi/2, npts + 2);
+        iangles = iangles(2:end - 1);
 
-        handles.initcond{1}=[1, 1, pi/3];
-        handles.initcond{2}=[1, 1, pi/4];
+        [Ts, Iangles] = meshgrid(ts, iangles);
+        Ts = Ts(:);
+        Iangles = Iangles(:);
+
+        for i = 1:size(Ts, 1)
+            to = Ts(i);
+            iangle = Iangles(i);
+
+            xo=table{piece(to),1}(to);    %get xo from entered value of to
+            yo=table{piece(to),2}(to);    %get yo from entered value of to
+
+            x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
+            y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
+            at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+            at=double(at);
+            ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
+            if (ao>pi)   %make angle between -pi and pi if not
+                ao=ao-2*pi;
+            end
+
+            handles.initcond{i} = [xo, yo, ao];
+        end
 
     else
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
@@ -928,11 +969,14 @@ else    %initial conditions are entered with t and incident angle
         handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
     end
 end
+
 nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
+
 if handles.tables   %if saved table is present
     handles.table=[handles.stable;handles.table];   %merge saved and current tables
     handles.tables=0;   %no saved tables present now
 end
+
 table=handles.table;
 cla %clear preview
 
@@ -1002,7 +1046,6 @@ for initcondi = handles.initcond
     n=1;    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
 
-
     % TODO: edit this for output printing
     set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
@@ -1011,7 +1054,7 @@ for initcondi = handles.initcond
     guidata(gcbo,handles);
 
     global derivComp    %table of components needed for derivative of the billiard map
-    derivComp=zeros(nmax,4);   
+    derivComp=zeros(nmax,4);
 
     % for each initial condition
     while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
@@ -1027,14 +1070,13 @@ for initcondi = handles.initcond
         xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
-        
-        iterate
-        %try
-        %    iterate %find the location and angle of the next collision
-        %catch   %if error in iterate then run the following:
-        %    'iterate error' %error message
-        %    handles.done=1;   %prevents further calculations due to error
-        %end    
+
+        try
+            iterate %find the location and angle of the next collision
+        catch   %if error in iterate then run the following:
+            'iterate error' %error message
+            handles.done=1;   %prevents further calculations due to error
+        end
     end
 
     data=data(1:n,:);   %delete the rows of data that were not calculated

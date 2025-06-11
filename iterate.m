@@ -298,7 +298,8 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     data(n,3)=NaN;  %store incident angle as non-existing for corners
 else
     %non-corner collision
-    at=subs(deriv(newpiece),told);  %angle of tangent line to table at point of collision
+    derivMat = matlabFunction(deriv); % convert symbolic function to matlab function so it can handle Inf
+    at=derivMat(told);  %angle of tangent line to table at point of collision
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
     if data(n,3)>pi/2
