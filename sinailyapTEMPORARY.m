@@ -36,20 +36,17 @@ if isnan(ao) || isnan(a1) %in case the angle is passed as a NaN use previous val
     derivTable(x,3)=derivTable(x-1,3);
     derivTable(x,4)=derivTable(x-1,4);
 else
-    if piece0==5    %if r0 is on the circle
-        curvatureo=1/r;
-        if derivComp(x+1,4)==5  %if r1 is on the circle
-            curvature1=1/r;
-        else
-            curvature1=0;
-        end
-    else    %if r0 is on the square
-        curvatureo=0;
-        if piece1==5  %if r1 is on the circle
-            curvature1=1/r;
-        else
-            curvature1=0;
-        end
+    circle_pieces = [2, 4, 6, 8, 9]; % pieces that are circular
+    if ismember(piece0, circle_pieces)
+        curvatureo = 1/r;
+    else
+        curvatureo = 0;
+    end
+    
+    if ismember(piece1, circle_pieces)
+        curvature1 = 1/r;
+    else
+        curvature1 = 0;
     end
     derivTable(x,1)=-1/cos(a1)*(tau*curvatureo+cos(ao));
     derivTable(x,2)=-(tau)/cos(a1);
