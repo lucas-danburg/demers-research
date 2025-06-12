@@ -1,4 +1,4 @@
-function table=Squircle(w,r,rho,to)
+function table=squirclecell(w,r,rho,to)
 global table
 table=cell(8,5);
 
