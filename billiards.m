@@ -26,7 +26,7 @@ function varargout = billiards(varargin)
 %    FIG = BILLIARDS launch billiards BILLIARDS.
 %    BILLIARDS('callback_name', ...) invoke the named callback.
 
-% Last Modified by GUIDE v2.5 10-Jun-2025 11:34:12
+% Last Modified by GUIDE v2.5 12-Jun-2025 10:28:56
 global torus % TORUS
 if exist('torus','var') && strcmp(torus,'torus') % TORUS
     isTorus = true; % TORUS
@@ -440,11 +440,11 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 		else
 			kaplan(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),str2num(get(handles.param3e,'String')),get(handles.extraoptions,'Value'),0);
 		end
-    case 17  %sinai TEMPORARY
+    case 17  %Squircle Cell
         if handles.tables
-            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), handles.to);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), handles.to);
         else
-            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), 0);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), 0);
         end
     end
     
@@ -680,7 +680,7 @@ case 16 %kaplan billiard
 	set(handles.param1l,'String','Side Length')
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
-case 17  %Sinai TEMPORARY
+case 17  %Squircle Cell
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Radius of inner circle')
@@ -786,7 +786,7 @@ case 7 %asym Lemon
 case 8 %Moon
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
-case 17 %Sinai TEMPORARY
+case 17 %Squircle Cell
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
 end
@@ -1237,10 +1237,10 @@ case 3  %graph of Lyapunov Exponent for Different Billiard domains
             r=str2num(get(handles.param3e,'String'));
             option=get(handles.extraoptions,'Value');
             kaplanlyap(r,option,derivComp,nmax,raw)
-        case 17 %run sinailyap TEMPORARY if the domain is sinai TEMPORARY
+        case 17 %run squirclecelllyap if the domain is squirclecell
             r=str2num(get(handles.param2e,'String'));
             rho = str2num(get(handles.param3e,'String'));
-            sinailyapTEMPORARY(r,rho,derivComp,nmax,raw)
+            squirclecellyap(r,rho,derivComp,nmax,raw)
        
     end
 case 4  %phase space:  s vs incident angle
