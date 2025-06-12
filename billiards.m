@@ -32,9 +32,9 @@ if exist('torus','var') && strcmp(torus,'torus') % TORUS
     isTorus = true; % TORUS
 end% Example: set torus based on GUI or user input % TORUS
 % If you have a GUI checkbox or dropdown for torus, set it like this: % TORUS
-if get(handles.torusCheckbox,'Value') == 1 % TORUS
+%if get(handles.torusCheckbox,'Value') == 1 % TORUS
     torus = 'torus'; % TORUS
-end % TORUS
+%end % TORUS
 
 if nargin == 0  % LAUNCH GUI
    
@@ -442,9 +442,9 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 		end
     case 17  %sinai TEMPORARY
         if handles.tables
-            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),handles.to);
+            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), handles.to);
         else
-            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),0);
+            sinaiTEMPORARY(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), 0);
         end
     end
     
@@ -682,7 +682,8 @@ case 16 %kaplan billiard
 	set(handles.param3l,'String','Radius')
 case 17  %Sinai TEMPORARY
     set(handles.param1l,'String','Width of square')
-    set(handles.param2l,'String','Radius of circle')
+    set(handles.param2l,'String','Radius of outer circles')
+    set(handles.param3l,'String','Radius of inner circle')
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
@@ -783,6 +784,9 @@ case 7 %asym Lemon
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
 case 8 %Moon
+    set(handles.param3l,'Visible','on')
+    set(handles.param3e,'Visible','on')
+case 17 %Sinai TEMPORARY
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
 end
@@ -1235,7 +1239,8 @@ case 3  %graph of Lyapunov Exponent for Different Billiard domains
             kaplanlyap(r,option,derivComp,nmax,raw)
         case 17 %run sinailyap TEMPORARY if the domain is sinai TEMPORARY
             r=str2num(get(handles.param2e,'String'));
-            sinailyapTEMPORARY(r,derivComp,nmax,raw)
+            rho = str2num(get(handles.param3e,'String'));
+            sinailyapTEMPORARY(r,rho,derivComp,nmax,raw)
        
     end
 case 4  %phase space:  s vs incident angle
