@@ -1,6 +1,6 @@
 function table=squirclecell(w,r,rho,to)
 global table
-table=cell(9,5);
+table={};
 
 % Parameters
 L = w - 2*r;      % length of straight segment
@@ -63,13 +63,26 @@ table{8,3}=table{7,4};
 table{8,4}=table{8,3} + L;
 table{8,5}=1;
 
-% 9. Middle circle: 
-table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
-table{9,2}=inline([num2str(rho),'*sin(t/',num2str(rho),')']);
-table{9,3}=table{8,4};
-table{9,4}=2*pi*rho+table{9,3};
-table{9,5}=2;
 
+n = 5;  % squareness factor (even integer > 2 gives a nice squircle)
+
+% 9. Middle squircle
+table{9,1} = inline([...
+    num2str(rho), ' * sign(cos(t/', num2str(rho), ')) .* abs(cos(t/', num2str(rho), ')).^(2/', num2str(n), ')']);  % x(t)
+
+table{9,2} = inline([...
+    num2str(rho), ' * sign(sin(t/', num2str(rho), ')) .* abs(sin(t/', num2str(rho), ')).^(2/', num2str(n), ')']);  % y(t)
+
+table{9,3} = table{8,4};                 % Start time
+table{9,4} = 2*pi*rho + table{9,3};      % End time (like the circle)
+table{9,5} = 4;                          % Custom type for squircle
+
+% 9. Middle circle: 
+%table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
+%table{9,2}=inline([num2str(rho),'*sin(t/',num2str(rho),')']);
+%table{9,3}=table{8,4};
+%table{9,4}=2*pi*rho+table{9,3};
+%table{9,5}=2;
 
 hold on;
 for n=1:9
