@@ -15,8 +15,8 @@ table{1,4} = to + A;
 table{1,5} = 2;
 
 % 2. Bottom edge: from (w/2, -w/2) to (-w/2, -w/2)
-table{2,1} = inline(['-t+',num2str(L/2 + table{1,4})],'t');
-table{2,2} = inline(num2str(-w/2),'t');
+table{2,1} = inline(['-t+',num2str(L/2 + table{1,4})], 't');
+table{2,2} = inline(num2str(-w/2) ,'t');
 table{2,3} = table{1,4};
 table{2,4} = table{2,3} + L;
 table{2,5} = 1;
@@ -43,8 +43,8 @@ table{5,4}=table{5,3} + A;
 table{5,5}=2;
 
 % 6. Top edge: from (-w/2, w/2) to (w/2, w/2)
-table{6,1}=inline(['t+',num2str(-L/2 - table{5,4})],'t');
-table{6,2}=inline(num2str(w/2),'t');
+table{6,1}=inline(['t+',num2str(-L/2 - table{5,4})], 't');
+table{6,2}=inline(num2str(w/2), 't');
 table{6,3}=table{5,4};
 table{6,4}=table{6,3} + L;
 table{6,5}=1;
@@ -58,14 +58,14 @@ table{7,5}=2;
 
 % 8. Right edge: from (w/2, -w/2) to (w/2, w/2)
 table{8,1}=inline(num2str(w/2),'t');
-table{8,2}=inline(['-t+',num2str(table{7,4} + L/2)],'t');
+table{8,2}=inline(['-t+',num2str(table{7,4} + L/2)], 't');
 table{8,3}=table{7,4};
 table{8,4}=table{8,3} + L;
 table{8,5}=1;
 
 % 9. Middle circle: 
 table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
-table{9,2}=inline([num2str(-rho),'*sin(t/',num2str(rho),')']);
+table{9,2}=inline([num2str(rho),'*sin(t/',num2str(rho),')']);
 table{9,3}=table{8,4};
 table{9,4}=2*pi*rho+table{9,3};
 table{9,5}=2;
