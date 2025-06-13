@@ -65,10 +65,10 @@ table{8,5}=1;
 
 % 9. Middle circle: 
 table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
-table{9,2}=inline([num2str(-rho),'*sin(t/',num2str(rho),')']);
+table{9,2}=inline([num2str(rho),'*sin(t/',num2str(rho),')']);
 table{9,3}=table{8,4};
 table{9,4}=2*pi*rho+table{9,3};
-table{9,5}=2;
+table{9,5}=3;
 
 
 hold on;
