@@ -68,9 +68,7 @@ n = 5;  % squareness factor (even integer > 2 gives a nice squircle)
 
 % 9. Middle squircle
 table{9,1} = inline([num2str(rho), ' * sign(cos(t/', num2str(rho), ')) .* abs(cos(t/', num2str(rho), ')).^(2/', num2str(n), ')']);  % x(t)
-
 table{9,2} = inline([num2str(rho), ' * sign(sin(t/', num2str(rho), ')) .* abs(sin(t/', num2str(rho), ')).^(2/', num2str(n), ')']);  % y(t)
-
 table{9,3} = table{8,4};                 % Start time
 table{9,4} = 2*pi*rho + table{9,3};      % End time (like the circle)
 table{9,5} = 3;                          % Custom type for squircle
