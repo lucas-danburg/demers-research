@@ -1,6 +1,6 @@
 function table=squirclecell(w,r,rho,to)
 global table
-table=cell(8,5);
+table=cell(9,5);
 
 % Parameters
 L = w - 2*r;      % length of straight segment
@@ -68,7 +68,7 @@ table{9,1}=inline([num2str(rho),'*cos(t/',num2str(rho),')']);
 table{9,2}=inline([num2str(rho),'*sin(t/',num2str(rho),')']);
 table{9,3}=table{8,4};
 table{9,4}=2*pi*rho+table{9,3};
-table{9,5}=3;
+table{9,5}=2;
 
 
 hold on;
