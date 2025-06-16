@@ -1,4 +1,4 @@
-function table=squirclecell(w,r,rho,delta, to)
+function table=squirclecell(w,r,rho,delta,to)
 global table
 table={};
 
@@ -63,17 +63,28 @@ table={};
     table{8,4}=table{8,3} + L;
     table{8,5}=1;
 
-    % 9. Middle squircle:
-    table{9,1} = inline(['sign(cos(t))*', num2str(delta), ' + cos(t)*', num2str(1-delta)], 't');
-    table{9,2} = inline(['sign(sin(t))*', num2str(delta), ' + sin(t)*', num2str(1-delta)], 't');
-    table{9,3} = table{8,4};                 
-    table{9,4} = 2*pi + table{9,3};      
-    table{9,5} = 3;
+% 9. Middle squircle:
+alpha = inline(['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))']);
 
-    hold on;
-    for n=1:9
-    ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
-    end
-    axis equal
-    hold off
+% f(t) - circle
+fx = inline(['cos(t/', num2str(rho), ')']);
+fy = inline(['sin(t/', num2str(rho), ')']);
 
+% g(t) - square
+gx = inline(['cos(t/', num2str(rho), ')/cos', alpha]);
+gy = inline(['sin(t/', num2str(rho), ')/cos', alpha]);
+
+% Interpolated functions
+table{9,1} = inline(['(', fx, ')*', num2str(1-delta), ' + (', gx, ')*', num2str(delta)], 't');
+table{9,2} = inline(['(', fy, ')*', num2str(1-delta), ' + (', gy, ')*', num2str(delta)], 't');
+table{9,3} = table{8,4};
+table{9,4} = table{9,3} + 2*pi*rho;
+table{9,5} = 3;
+
+hold on;
+for n=1:9
+ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
+end
+axis equal
+hold off
+end
