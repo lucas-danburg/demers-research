@@ -1,6 +1,5 @@
 function varargout = billiards(varargin)
 %Program to simulate arbitrary classical billiard systems.
-
 %handles.table  saved table
 %   columns:  x(t), y(t), lower bound for t, upper bound for t
 %   each row is a different piece of the table
@@ -10,7 +9,6 @@ function varargout = billiards(varargin)
 %   1 row for each iteration
 %handles.initcond  cell array of all initial conditions (used primarily for
 %   drawing configuration space)
-%   [xo, yo, ao, to, iangle]
 %handles.tables  boolean saying whether or not tables are saved for creating overlapping
 %   tables
 %handles.stable saved table that should not be edited when creating
@@ -24,7 +22,7 @@ function varargout = billiards(varargin)
 % BILLIARDS Application M-file for billiards.fig
 %    FIG = BILLIARDS launch billiards BILLIARDS.
 %    BILLIARDS('callback_name', ...) invoke the named callback.
-% Last Modified by GUIDE v2.5 11-Jun-2025 13:18:49
+% Last Modified by GUIDE v2.5 13-Jun-2025 15:58:08
 if nargin == 0  % LAUNCH GUI
    
 	fig = openfig(mfilename,'reuse');
@@ -41,7 +39,6 @@ if nargin == 0  % LAUNCH GUI
     set(handles.savet,'Enable','off')   %turn off file, save table
     set(handles.saved,'Enable','off')   %turn off file, save data
     set(handles.newinitmenu,'Enable','off') %turn off file, new initial conditions
-    
     
 	if nargout > 0
 		varargout{1} = fig;
@@ -414,9 +411,9 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 		end
     case 17  %Squircle Cell
         if handles.tables
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), handles.to);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')),handles.to);
         else
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), 0);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')), 0);
         end
     end
     
@@ -646,9 +643,12 @@ case 16 %kaplan billiard
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
 case 17  %Squircle Cell
+    %set(handles.text20, 'String', 'Convex: (Square)0-1(Circle)/nConcave: Delta > 1')
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Radius of inner circle')
+    set(handles.param4l,'String','Squircle')
+    set(handles.param4e,'String','Delta')
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
@@ -754,6 +754,8 @@ case 8 %Moon
 case 17 %Squircle Cell
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
+    set(handles.param4l,'Visible','on')
+    set(handles.param4e,'Visible','on')
 end
 % --------------------------------------------------------------------
 function varargout = custom_Callback(h, eventdata, handles, varargin)
@@ -911,7 +913,6 @@ else    %initial conditions are entered with t and incident angle
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
-        piece(table, to)
         xo=table{piece(table, to),1}(to);    %get xo from entered value of to
         yo=table{piece(table, to),2}(to);    %get yo from entered value of to
 
@@ -925,14 +926,13 @@ else    %initial conditions are entered with t and incident angle
         end
 
         handles.initcond{1}=[xo,yo,ao, to, iangle]; %save initial conditions for later use
+        end
     end
-end
-
+   
 if handles.tables   %if saved table is present
     handles.table=[handles.stable;handles.table];   %merge saved and current tables
     handles.tables=0;   %no saved tables present now
 end
-
 table=handles.table;
 cla %clear preview
 
@@ -1009,7 +1009,7 @@ for initcondi = handles.initcond
     guidata(gcbo,handles);
 
     global derivComp    %table of components needed for derivative of the billiard map
-    derivComp=zeros(nmax,4);
+    derivComp=zeros(nmax,4);   
 
     % for each initial condition
     while n<nmax && ~handles.done   %while we have not completed enough iterations and still not done
@@ -1025,13 +1025,13 @@ for initcondi = handles.initcond
         xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
-
-        try
-            iterate %find the location and angle of the next collision
-        catch   %if error in iterate then run the following:
-            'iterate error' %error message
-            handles.done=1;   %prevents further calculations due to error
-        end
+    
+    try
+        iterate %find the location and angle of the next collision
+    catch   %if error in iterate then run the following:
+        'iterate error' %error message
+        handles.done=1;   %prevents further calculations due to error
+    end    
     end
 
     data=data(1:n,:);   %delete the rows of data that were not calculated
@@ -1504,7 +1504,6 @@ case 6  %Type of data:  Distance between bounces
 end
 
 
-
 % --------------------------------------------------------------------
 function varargout = initial_Callback(h, eventdata, handles, varargin)
 %Enter new initial conditions for same table
@@ -1927,5 +1926,29 @@ set(handles.initphase,'Visible','on')
 % --- Executes on mouse press over axes background.
 function preview_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to preview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text20.
+function text20_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over databox.
+function databox_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to databox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over param2l.
+function param2l_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to param2l (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
