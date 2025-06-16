@@ -8,11 +8,11 @@ table={};
     to = 0;           % starting parameter for first arc
     
     % 1. Bottom-right arc: center at (w/2, -w/2), angle = pi/2 to pi
-    table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');
-    table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');
-    table{1,3} = to;
-    table{1,4} = to + A;
-    table{1,5} = 2;
+    table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');  % X(t)
+    table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't'); % Y(t)
+    table{1,3} = to;     % Start time
+    table{1,4} = to + A; % End time
+    table{1,5} = 2;      % Determines type of boundary
     
     % 2. Bottom edge: from (w/2, -w/2) to (-w/2, -w/2)
     table{2,1} = inline(['-t+',num2str(L/2 + table{1,4})], 't');
@@ -63,10 +63,17 @@ table={};
     table{8,4}=table{8,3} + L;
     table{8,5}=1;
 
-    table{9,1} = inline([num2str(rho), ' * sign(cos(t/', num2str(rho), ')) .* abs(cos(t/', num2str(rho), ')).^',num2str(delta)]);  % x(t)
-    table{9,2} = inline([num2str(rho), ' * sign(sin(t/', num2str(rho), ')) .* abs(sin(t/', num2str(rho), ')).^',num2str(delta)]);  % y(t)
-    table{9,3} = table{8,4};                 % Start time
-    table{9,4} = 2*pi*rho + table{9,3};      % End time (like the circle)
+% 9. Middle squircle:
+n = 2/(1-delta);
+if delta < 1
+    n = 2/(1-delta);
+    table{9,1} = inline([num2str(rho), '.*sign(cos(t)).*abs(cos(t)).^(2/', num2str(n), ')'], 't');
+    table{9,2} = inline([num2str(rho), '.*sign(sin(t)).*abs(sin(t)).^(2/', num2str(n), ')'], 't');
+else
+    table{9,1} = inline([num2str(rho), '.*sign(cos(t))'], 't');
+    table{9,2} = inline([num2str(rho), '.*sign(sin(t))'], 't');
+end
+    table{9,3} = table{8,4};                 
+    table{9,4} = 2*pi*rho + table{9,3};      
     table{9,5} = 3;
-
 end
