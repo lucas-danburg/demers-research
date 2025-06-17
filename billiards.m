@@ -845,7 +845,66 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
+
+    handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
+
+% TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
+    % temporary for testing generation
+    if get(handles.inite1, 'String') == 'generate'
+        % phase space bounds
+        %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
+        
+        n_ts = 2 % this will become user input
+        n_iangles = 3; % this will become user input
+
+        % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
+
+        % TODO (?): billiard table is equivilent to trajectories on a certain topology?
+
+        % generating t values between to and tmax
+        % we generate one additional value (an endpoint) and then remove it
+        % since the first t value is equivalent topologically to the last one, because
+        % t is arc length around the boundary.
+        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, n_ts + 1);
+        ts = ts(1:end - 1);
+
+        % for generating angles, we remove BOTH endpoints, because an outgoing angle of
+        % +/- pi/2 would be tangent to the boundary, and the trajectory would shoot outside
+        % of the table.
+        % first, figure out dphi (delta-phi), the length that each phi point will cover
+        % out of the (-pi/2, pi/2) interval
+        dphi = pi / (n_iangles);
+        % then generate values between -pi/2 + dphi/2 and pi/2 - dphi/2. this ensures that
+        % 1) the endpoints of +/- pi/2 arent included, and 2) that each phi/iangle value 
+        % is a midpoint value
+        iangles = linspace(-pi/2 + dphi/2, pi/2 - dphi/2, n_iangles);
+        % numpy's linspace function is much better
+
+        [Ts, Iangles] = meshgrid(ts, iangles);
+        Ts = Ts(:)
+        Iangles = Iangles(:);
+
+        for i = 1:size(Ts, 1)
+            to = Ts(i);
+            iangle = Iangles(i);
+
+            xo=table{piece(table, to),1}(to);    %get xo from entered value of to
+            yo=table{piece(table, to),2}(to);    %get yo from entered value of to
+
+            x=eval(char(table{piece(table, to),1})); %symbolic expression for x(t) for relevant piece
+            y=eval(char(table{piece(table, to),2})); %symbolic expression for y(t) for relevant piece
+            at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+            at=double(at);
+            ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
+            if (ao>pi)   %make angle between -pi and pi if not
+                ao=ao-2*pi;
+            end
+
+            handles.initcond{i} = [xo, yo, ao, to, iangle];
+        end
+
+    else
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
@@ -920,6 +979,15 @@ drawnow %force Matlab to update the GUI display
 handles.initcond{end+1}=[xo,yo,ao]; %save initial conditions for later use
 guidata(gcbo,handles);
 
+% FOR LOOP START (?)
+condit_n = 1;
+max_condits = size(handles.initcond, 2);
+for initcondi = handles.initcond
+    initcondi = initcondi{1}
+    xo = initcondi(1);
+    yo = initcondi(2);
+    ao = initcondi(3);
+
     %d is initl3 of tangent line for each piece (d is a vector of functions of t)
     deriv=sym(zeros(size(table,1),1));
     for m=1:size(table,1)
@@ -927,13 +995,12 @@ guidata(gcbo,handles);
         y=eval(char(table{m,2}));   %symbolic function for y(t)
         deriv(m,1)=atan(diff(y,t)/diff(x,t));
     end
+    deriv
     data=zeros(nmax,4); %allocate space for all data
-    n=1;    %n is current iteration being calculated
+    n=1    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
-
-
-
-set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
+    disp('here')
+    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
     drawnow
     handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
@@ -954,14 +1021,14 @@ set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'
         xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
-        
-    
-    try
-        iterate %find the location and angle of the next collision
-    catch   %if error in iterate then run the following:
-        'iterate error' %error message
-        handles.done=1;   %prevents further calculations due to error
-    end    
+
+        iterate
+        % try
+        %     iterate %find the location and angle of the next collision
+        % catch   %if error in iterate then run the following:
+        %     'iterate error' %error message
+        %     handles.done=1;   %prevents further calculations due to error
+        % end
     end
     data=data(1:n,:);   %delete the rows of data that were not calculated
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data

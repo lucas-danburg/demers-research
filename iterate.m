@@ -16,7 +16,8 @@ z=[];
 
 for j=1:size(table,1)
     %fun is tan(ao)*(x(t)-xo)-y(t)+yo
-    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);    
+    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);
+    disp('here2')
     a=table{j,3};   %lower bound of t for piece
     b=table{j,4};   %upper bound of t for piece
     
@@ -191,6 +192,7 @@ for j=1:size(table,1)
         end
     end
 end
+disp('here3')
 zzz=z;   %backup of z for debugging
 
 remove=[];  %index values of z for bad roots
@@ -212,25 +214,26 @@ else
 end
 
 z(remove)=[];
-
+disp('here4')
 zz=z;   %backup of z (in case all roots are removed in next step)
     
 if n~=1
     z=z(find(abs(z-data(n-1,1))>2*10^-4));  %remove root that corresponds to the particle's current position
 end
-
+disp('here5')
 %if no root is found increase tolerance on removal of root that corresponds
 %to no movement
 if size(z,2)==0    
     z=zz;
     z=z(find(abs(z-data(n-1,1))>10^-8));  %remove root that corresponds to the particle's current position
 end
-    
+disp('here6')
 %find the value of possible values of t that has minimum distance from
 %last point
 
 
 if size(z,2)~=1
+    disp('here77')
     distance=zeros(1,size(z,2));
     for k=1:size(z,2)
         i=piece(z(k));
@@ -248,24 +251,31 @@ if size(z,2)~=1
            handles.done=1;
        end
    end
+   disp('here7')
 else
+    disp('here88')
     data(n,1)=z;  %store z value as correct t value for this iteration
+    disp('here8')
 end
+disp('here999')
 told=data(n,1);   %told is t location of this collision
 data(n,4)=piece(told); %which piecewise function of the table t is located in
 newpiece=data(n,4);  %newpiece is the number of the piecewise function that is hit
+disp('here9')
 
 %determines if it hit a corner or not by checking if t is near the
 %bounds of the piece it is on and then making sure the piece does not
 %loop back onto itself there
 if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(table{newpiece,1}(table{newpiece,3})-table{newpiece,1}(table{newpiece,4}))>10^-8 | abs(table{newpiece,2}(table{newpiece,3})-table{newpiece,2}(table{newpiece,4}))>10^-8)
+    disp('here9.1')
     %collision with corner detected
     j=1;    %index of other piece that makes up the corner
     x=inline(char(diff(eval(char(table{newpiece,1})),t)));   %x'(t) for new piece
     y=inline(char(diff(eval(char(table{newpiece,2})),t)));   %y'(t) for new piece
-        
+    disp('here9.2')
     if told-table{newpiece,3}<2*10^-4   %if hit the corner corresponding lower values of t for the piece
-        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-4  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
+        disp('here9.33')
+        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-2  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
 
@@ -274,35 +284,53 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
             
         %calculates the reflection angle for bouncing off the corner            
         data(n,2)=atan2(y(table{newpiece,3}),x(table{newpiece,3}))+atan2(yj(table{j,4}),xj(table{j,4}))-ao;
-
+        disp('here9.3')
     else
-        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-4 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
-            j=j+1;  %trying to find piece that is the other side of the corner
+        disp('here9.44')
+        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-2 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
+            j=j+1  %trying to find piece that is the other side of the corner
         end
+        disp('here9.4')
             
         xj=inline(char(diff(eval(char(table{j,1})),t)));        %x'(t) for j piece 
         yj=inline(char(diff(eval(char(table{j,2})),t)));        %y'(t) for j piece 
  
         %calculates the reflection angle for bouncing off the corner
         data(n,2)=atan2(y(table{newpiece,4}),x(table{newpiece,4}))+atan2(yj(table{j,3}),xj(table{j,3}))-ao;
-
+        disp('here9.5')
             
     end
     data(n,2)=mod(data(n,2),2*pi); %move reflection angle to the principel value
     data(n,3)=NaN;  %store incident angle as non-existing for corners
+    disp('here9.6')
 else
+    disp('here99')
     %non-corner collision
-    derivMat = matlabFunction(deriv); % convert symbolic function to matlab function so it can handle Inf
+    derivMat = matlabFunction(deriv(newpiece)) % convert symbolic function to matlab function so it can handle Inf
     at=derivMat(told);  %angle of tangent line to table at point of collision
+    told
+    at
+    mod(-ao+2*at,2*pi)
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
+    disp('here99.1')
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
+    disp('here99.2')
     if data(n,3)>pi/2
+        disp('here99.33')
         data(n,3)=data(n,3)-pi;  %incident angle in correct interval
+        disp('here99.3')
     end
+    disp('here9.7')
 end
 if data(n,2)>pi
     data(n,2)=data(n,2)-2*pi;  %correcting horizontal angle if not principle value
+    disp('here9.8')
 end
 xo = table{data(n,4),1}(data(n,1));
 yo = table{data(n,4),2}(data(n,1));
 ao = data(n,2);
+disp('here10')
+if isTorus
+    if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
+    if yo > l/2, yo = yo - l; elseif yo < -l/2, yo = yo + l; end
+end
