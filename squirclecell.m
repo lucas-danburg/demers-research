@@ -65,18 +65,20 @@ table={};
 
 % 9. Middle squircle:
 
-alpha = ['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))'];
+%alpha = ['((t/', num2str(rho), ') - (pi/2)*round(2*t/(', num2str(rho), '*pi)))'];
 
 % f(t) - circle
-fx = ['cos(t/', num2str(rho), ')'];
-fy = ['sin(t/', num2str(rho), ')'];
+%fx = [num2str(rho), '*cos(t/', num2str(rho), ')'];
+%fy = [num2str(rho), '*sin(t/', num2str(rho), ')'];
 
 % g(t) - square (substitute alpha_str directly)
-gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')/cos', alpha];
-gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')/cos', alpha];
+%gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')./max(abs(cos', alpha,'), 1e-6)'];
+%gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')./max(abs(cos', alpha,'), 1e-6)'];
 
-table{9,1} = inline(['(', fx, ')*', num2str(delta), ' + (', gx, ')*', num2str(1-delta)], 't');
-table{9,2} = inline(['(', fy, ')*', num2str(delta), ' + (', gy, ')*', num2str(1-delta)], 't');
+%table{9,1} = inline(['(', fx, ')*', num2str(delta), ' + (', gx, ')*', num2str(1-delta)], 't');
+table{9,1} = inline(['(', num2str(rho), '*cos(t/', num2str(rho), '))*', num2str(delta), ' + ((2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')./max(abs(cos((t/', num2str(rho), ') - (pi/2)*round(2*t/(', num2str(rho), '*pi)))), 1e-6))*', num2str(1-delta)], 't');
+%table{9,2} = inline(['(', fy, ')*', num2str(delta), ' + (', gy, ')*', num2str(1-delta)], 't');
+table{9,2} = inline(['(', num2str(rho), '*sin(t/', num2str(rho), '))*', num2str(delta), ' + ((2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')./max(abs(cos((t/', num2str(rho), ') - (pi/2)*round(2*t/(', num2str(rho), '*pi)))), 1e-6))*', num2str(1-delta)], 't');
 table{9,3} = table{8,4};
 table{9,4} = table{9,3} + 2*pi*rho;
 table{9,5} = 3;
