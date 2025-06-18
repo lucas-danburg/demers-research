@@ -12,12 +12,6 @@
 %for example:  data(n-1,1) is t value for last intersection
 
 %find all possible values for t
-global torus
-isTorus = false; % Default: not a torus
-% Example: set to true for a specific table or initial condition
-if exist('torus','var') && strcmp(torus,'torus')
-    isTorus = true;
-end
 z=[];
 
 for j=1:size(table,1)
@@ -312,8 +306,3 @@ end
 xo = table{data(n,4),1}(data(n,1));
 yo = table{data(n,4),2}(data(n,1));
 ao = data(n,2);
-
-if isTorus
-    if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
-    if yo > l/2, yo = yo - l; elseif yo < -l/2, yo = yo + l; end
-end
