@@ -1,4 +1,4 @@
-function table=squirclecell(w,r,rho,delta, to)
+function table=squirclecell(w,r,rho,delta,to)
 global table
 table={};
 
@@ -8,11 +8,11 @@ table={};
     to = 0;           % starting parameter for first arc
     
     % 1. Bottom-right arc: center at (w/2, -w/2), angle = pi/2 to pi
-    table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');
-    table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');
-    table{1,3} = to;
-    table{1,4} = to + A;
-    table{1,5} = 2;
+    table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');  % X(t)
+    table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't'); % Y(t)
+    table{1,3} = to;     % Start time
+    table{1,4} = to + A; % End time
+    table{1,5} = 2;      % Determines type of boundary
     
     % 2. Bottom edge: from (w/2, -w/2) to (-w/2, -w/2)
     table{2,1} = inline(['-t+',num2str(L/2 + table{1,4})], 't');
@@ -63,10 +63,55 @@ table={};
     table{8,4}=table{8,3} + L;
     table{8,5}=1;
 
-    table{9,1} = inline([num2str(rho), ' * sign(cos(t/', num2str(rho), ')) .* abs(cos(t/', num2str(rho), ')).^',num2str(delta)]);  % x(t)
-    table{9,2} = inline([num2str(rho), ' * sign(sin(t/', num2str(rho), ')) .* abs(sin(t/', num2str(rho), ')).^',num2str(delta)]);  % y(t)
-    table{9,3} = table{8,4};                 % Start time
-    table{9,4} = 2*pi*rho + table{9,3};      % End time (like the circle)
-    table{9,5} = 3;
+% 9. Middle squircle:
 
+alpha = ['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))'];
+
+% f(t) - circle
+fx = ['cos(t/', num2str(rho), ')'];
+fy = ['sin(t/', num2str(rho), ')'];
+
+% g(t) - square (substitute alpha_str directly)
+gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')/cos', alpha];
+gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')/cos', alpha];
+
+table{9,1} = inline(['(', fx, ')*', num2str(delta), ' + (', gx, ')*', num2str(1-delta)], 't');
+table{9,2} = inline(['(', fy, ')*', num2str(delta), ' + (', gy, ')*', num2str(1-delta)], 't');
+table{9,3} = table{8,4};
+table{9,4} = table{9,3} + 2*pi*rho;
+table{9,5} = 3;
+
+% Compute perimeter (approximate numerically)
+t = linspace(0, 2*pi*rho, 1000); % or use your actual parameter range
+x = table{9,1}(t);
+y = table{9,2}(t);
+dx = diff(x);
+dy = diff(y);
+P = sum(sqrt(dx.^2 + dy.^2)); % Approximate perimeter
+
+C = 2*pi*r; % Ball circumference
+
+ratio = P/C;
+tol = 1e-6; % Tolerance for rational check
+
+% Check if ratio is close to a rational number
+[max_den, found] = deal(20, false);
+for den = 1:max_den
+    num = round(ratio*den);
+    if abs(ratio - num/den) < tol
+        found = true;
+        break;
+    end
+end
+
+if found
+    error('Periodic motion detected.');
+end
+
+hold on;
+for n=1:9
+ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
+end
+axis equal
+hold off
 end
