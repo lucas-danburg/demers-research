@@ -12,6 +12,12 @@
 %for example:  data(n-1,1) is t value for last intersection
 
 %find all possible values for t
+global torus
+isTorus = false; % Default: not a torus
+% Example: set to true for a specific table or initial condition
+if exist('torus','var') && strcmp(torus,'torus')
+    isTorus = true;
+end
 z=[];
 
 for j=1:size(table,1)
@@ -283,30 +289,25 @@ if size(z,2)~=1
            handles.done=1;
        end
    end
-   disp('here7')
 else
-    disp('here88')
     data(n,1)=z;  %store z value as correct t value for this iteration
-    disp('here8')
 end
 %disp('sucessful in finding root, z = ')
 %disp(data(n, 1))
 told=data(n,1);   %told is t location of this collision
 data(n,4)=piece(table, told); %which piecewise function of the table t is located in
 newpiece=data(n,4);  %newpiece is the number of the piecewise function that is hit
-disp('here9')
 
 %determines if it hit a corner or not by checking if t is near the
 %bounds of the piece it is on and then making sure the piece does not
 %loop back onto itself there
 if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(table{newpiece,1}(table{newpiece,3})-table{newpiece,1}(table{newpiece,4}))>10^-8 | abs(table{newpiece,2}(table{newpiece,3})-table{newpiece,2}(table{newpiece,4}))>10^-8)
-    disp('here9.1')
     %collision with corner detected
     %disp('corner detected')
     j=1;    %index of other piece that makes up the corner
     x=inline(char(diff(eval(char(table{newpiece,1})),t)));   %x'(t) for new piece
     y=inline(char(diff(eval(char(table{newpiece,2})),t)));   %y'(t) for new piece
-    disp('here9.2')
+        
     if told-table{newpiece,3}<2*10^-4   %if hit the corner corresponding lower values of t for the piece
         %disp('lower end of segment')
         while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-4  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
@@ -339,21 +340,15 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     data(n,3)=NaN;  %store incident angle as non-existing for corners
     %disp('stored inc = NaN')
 else
-    disp('here99')
     %non-corner collision
     derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
     at=derivMat(told);  %angle of tangent line to table at point of collision
     %at=subs(deriv(newpiece),told);
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
-    disp('here99.1')
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
-    disp('here99.2')
     if data(n,3)>pi/2
-        disp('here99.33')
         data(n,3)=data(n,3)-pi;  %incident angle in correct interval
-        disp('here99.3')
     end
-    disp('here9.7')
 end
 if data(n,2)>pi
     %disp('data(n, 2) > pi')
