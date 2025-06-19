@@ -914,10 +914,11 @@ else    %initial conditions are entered with t and incident angle
         y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
         at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
         ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
-    if ao>pi   %make angle between -pi and pi if not
+        if ao>pi   %make angle between -pi and pi if not
             ao=ao-2*pi;
         end
     end
+end
    
 nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
 if handles.tables   %if saved table is present
@@ -1014,7 +1015,7 @@ for initcondi = handles.initcond
         derivComp(n,3)=data(n,3);
         derivComp(n,4)=data(n,4);
 
-    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
+        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
         n=n+1;
         drawnow %force Matlab to update the GUI display
         handles=guidata(gcbo);
@@ -1033,6 +1034,7 @@ for initcondi = handles.initcond
     data=data(1:n,:);   %delete the rows of data that were not calculated
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
     guidata(gcbo,handles);
+end
 
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
@@ -1061,8 +1063,6 @@ set(handles.more,'Visible','on')
 set(handles.nmore,'Visible','on')
 set(handles.analysis,'Visible','on')
 set(handles.databox,'Visible','on')
-
-
 
 % --------------------------------------------------------------------
 function varargout = stop_Callback(h, eventdata, handles, varargin)
