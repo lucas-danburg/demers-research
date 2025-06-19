@@ -298,7 +298,7 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     disp('here9.2')
     if told-table{newpiece,3}<2*10^-4   %if hit the corner corresponding lower values of t for the piece
         disp('lower end of segment')
-        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-2  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
+        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-4  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
 
@@ -311,7 +311,7 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
         disp('assigned data')
     else
         disp('upper end of segment')
-        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-2 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
+        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-4 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
         
@@ -330,11 +330,9 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
 else
     disp('here99')
     %non-corner collision
-    derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
-    at=derivMat(told);  %angle of tangent line to table at point of collision
-    told
-    at
-    mod(-ao+2*at,2*pi)
+    %derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
+    %at=derivMat(told);  %angle of tangent line to table at point of collision
+    at=subs(deriv(newpiece),told);
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
     disp('here99.1')
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
@@ -351,14 +349,14 @@ if data(n,2)>pi
     data(n,2)=data(n,2)-2*pi;  %correcting horizontal angle if not principle value
     disp('corrected horiz angel to be principle (2pi)')
 end
-xo = table{data(n,4),1}(data(n,1));
+xo_c = table{data(n,4),1}(data(n,1));
 disp('got xo')
-yo = table{data(n,4),2}(data(n,1));
+yo_c = table{data(n,4),2}(data(n,1));
 disp('got yo')
-ao = data(n,2);
+ao_c = data(n,2);
 disp('got ao')
 
 if isTorus
-    if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
-    if yo > l/2, yo = yo - l; elseif yo < -l/2, yo = yo + l; end
+    if xo_c > w/2, xo_c = xo_c - w; elseif xo_c < -w/2, xo_c = xo_c + w; end
+    if yo_c > l/2, yo_c = yo_c - l; elseif yo_c < -l/2, yo_c = yo_c + l; end
 end
