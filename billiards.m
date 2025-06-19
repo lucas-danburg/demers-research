@@ -849,7 +849,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
-    handles.initcond{1}=[xo,yo,ao, "didnt calculate it", "didnt calculate it"]; %save initial conditions for later use
+    handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle

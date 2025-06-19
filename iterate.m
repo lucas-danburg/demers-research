@@ -271,7 +271,7 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     y=inline(char(diff(eval(char(table{newpiece,2})),t)));   %y'(t) for new piece
         
     if told-table{newpiece,3}<2*10^-4   %if hit the corner corresponding lower values of t for the piece
-        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-4  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
+        while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-2  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
 
@@ -282,7 +282,7 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
         data(n,2)=atan2(y(table{newpiece,3}),x(table{newpiece,3}))+atan2(yj(table{j,4}),xj(table{j,4}))-ao;
 
     else
-        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-4 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
+        while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-2 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-2  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
             
@@ -298,7 +298,7 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     data(n,3)=NaN;  %store incident angle as non-existing for corners
 else
     %non-corner collision
-    derivMat = matlabFunction(deriv); % convert symbolic function to matlab function so it can handle Inf
+    derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
     at=derivMat(told);  %angle of tangent line to table at point of collision
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
