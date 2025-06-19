@@ -360,9 +360,12 @@ if data(n,2)>pi
     data(n,2)=data(n,2)-2*pi;  %correcting horizontal angle if not principle value
     %disp('corrected horiz angel to be principle (2pi)')
 end
-xo = table{data(n,4),1}(data(n,1)); %disp('got xo')
-yo = table{data(n,4),2}(data(n,1)); %disp('got yo');
-ao = data(n,2); %disp('got ao');
+xo = table{data(n,4),1}(data(n,1));
+%disp('got xo')
+yo = table{data(n,4),2}(data(n,1));
+%disp('got yo');
+ao = data(n,2);
+%disp('got ao');
 
 if isTorus
     if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
