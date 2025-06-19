@@ -1032,13 +1032,12 @@ for initcondi = handles.initcond
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
 
-        iterate
-        % try
-        %     iterate %find the location and angle of the next collision
-        % catch   %if error in iterate then run the following:
-        %     'iterate error' %error message
-        %     handles.done=1;   %prevents further calculations due to error
-        % end
+        try
+            iterate %find the location and angle of the next collision
+        catch   %if error in iterate then run the following:
+            'iterate error' %error message
+            handles.done=1;   %prevents further calculations due to error
+        end
     end
 
     data=data(1:n,:);   %delete the rows of data that were not calculated
@@ -1416,107 +1415,8 @@ case 1  %Type of data:  Raw Data (t, horizontal, incident, piece)
             end
         end
     end
-case 2  %type of data: positive lyapunov exponents
-    raw=1;
-    domain=get(handles.tablepopup,'Value');
-    switch domain  %check which billiard domain is being used
-        case 2  %if the table is a circle run circlelyap
-            r=str2num(get(handles.param1e,'String'));
-            limArr=circlelyap(r,derivComp,nmax,raw);
-        case 3 %the lyap function for non concentric circles does not exist
-            rx1=str2num(get(handles.param1e,'String'));
-            rx2=str2num(get(handles.param2e,'String'));
-            limArr=nonconcirclyap(rx1,rx2,derivComp,nmax,raw);
-        case 4  %if the table is an ellipse run ellipselyap
-            rx=str2num(get(handles.param1e,'String'));
-            ry=str2num(get(handles.param2e,'String'));
-            cx=str2num(get(handles.cx,'String'));
-            cy=str2num(get(handles.cy,'String'));
-            limArr=ellipselyap(rx,ry,cx,cy,derivComp,nmax,raw);
-        case 5 %the lyap function for limacon does not exist
-            msgbox(char('The Lyapunov Exponent Function for this domain does not exist.'))
-        case 6 %if the table is a lemon run lemonlyap
-            delta=str2num(get(handles.param1e,'String'));
-            limArr=lemonlyap(delta,derivComp,nmax,raw);
-        
-        case 7 %asym lemon
-            rx1=str2num(get(handles.param1e,'String'));
-            rx2=str2num(get(handles.param2e,'String'));
-            limArr=asymlemonlyap(rx1,rx2,derivComp,nmax,raw);        
-        
-        
-        
-        case 8   %if the table is a mushroom then run mushroomlyap
-            rx=str2num(get(handles.param1e,'String'));
-            circ=get(handles.extraoptions,'Value');
-            if circ==1    %if circular mushroom
-                ry=rx;    %use rx for ry
-            else    %if elliptical mushroom
-                ry=str2num(get(handles.param1e2,'String'));    %use entered value for ry
-            end     
-            cx=str2num(get(handles.cx,'String'));
-            cy=str2num(get(handles.cy,'String'));
-            limArr=mushroomlyap(rx,ry,derivComp,nmax,circ,cx,cy,raw);
-        case 9   %if the table is a double mushroom then run doubmushroomlyap
-            rx1=str2num(get(handles.param1e,'String'));  
-            ry1=str2num(get(handles.param1e2,'String')); 
-            circ=get(handles.extraoptions, 'Value');  
-            if circ==1    %if circular mushroom
-                rx2=str2num(get(handles.param1e,'String'));
-                ry2=rx2;    %use rx for ry
-            else    %if elliptical mushroom
-                rx2=str2num(get(handles.param1e2,'String'));
-                ry2=str2num(get(handles.param2e2,'String'));    %use entered value for ry
-            end     
-            cx=str2num(get(handles.cx,'String')); 
-            cy=str2num(get(handles.cy,'String'));
-            limArr=doubmushroomlyap(rx1,ry1,rx2,ry2,cx,cy,derivComp,nmax,circ,raw);
-        case 10 %if the billiard table is rounded mushroom run roundedmushroomlyap
-            circ=get(handles.extraoptions,'Value');
-            rx=str2num(get(handles.param1e,'String'));
-            if circ==1    %if circular mushroom
-                ry=rx;    %use rx for ry
-            else    %if elliptical mushroom
-                ry=str2num(get(handles.param1e2,'String'));    %use entered value for ry
-            end
-            cx=str2num(get(handles.cx,'String')); 
-            cy=str2num(get(handles.cy,'String'));
-            limArr=roundedmushroomlyap(rx,ry,derivComp,nmax,circ,cx,cy,raw);
-        case 11  %if the billiard table is a stadium then run stadiumlyap
-            type=get(handles.extraoptions,'Value');
-            circ=get(handles.extraoptions2,'Value');
-            rx=str2num(get(handles.param3e,'String'));
-            if circ==1    %if circular mushroom
-                ry=rx;    %use rx for ry
-            else    %if elliptical mushroom
-                ry=str2num(get(handles.param4e,'String'));    %use entered value for ry
-            end    
-            cx=str2num(get(handles.cx,'String'));
-            cy=str2num(get(handles.cy,'String'));
-            limArr=stadiumlyap(type,circ,rx,ry,derivComp,nmax,cx,cy,raw);
-        case 12 %for any polygon domain
-            msgbox(char('The Lyapunov Exponent for this domain is zero.'))
-        case 13 %for any rectangle domain
-            msgbox(char('The Lyapunov Exponent for this domain is zero.'))
-        case 14 %run sinailyap if the domain is sinai
-            r=str2num(get(handles.param2e,'String'));
-            limArr=sinailyap(r,derivComp,nmax,raw);
-        case 15 %run kaplanlyap if the domain is kaplan
-            r=str2num(get(handles.param3e,'String'));
-            option=get(handles.extraoptions,'Value');
-            limArr=kaplanlyap(r,option,derivComp,nmax,raw);
-        case 16 %run squirclecelllyap if the domain is squircle cell
-            r=str2num(get(handles.param2e,'String'));
-            rho=str2num(get(handles.param3e,'String'));
-            limArr=squirclecelllyap(r,rho, derivComp,nmax,raw);
-    end
-    if get(handles.radio1,'Value')==1 && domain~=5 && domain~=11 && domain~=12 %save data
-        save(uiputfile,'limArr')  %save prompt
-    end
-    if get(handles.radio2,'Value')==1 && domain~=5 && domain~=11 && domain~=12 %export data to command window
-        disp(limArr)
-    end
-case 3  %Type of data:  x and y
+
+case 2  %Type of data:  x and y
     for k=1:size(data,2)
         temp{k}=zeros(size(data,1),2);
         for n=1:size(data{k},1)
@@ -1537,7 +1437,7 @@ case 3  %Type of data:  x and y
             end
         end
     end
-case 4  %Type of data:  Incident angle  (column 3 of data file)
+case 3  %Type of data:  Incident angle  (column 3 of data file)
     if get(handles.radio1,'Value')==1   %save data
         data=data(:,3)
         save(uiputfile,'data','table')  %save prompt
@@ -1552,7 +1452,7 @@ case 4  %Type of data:  Incident angle  (column 3 of data file)
             end
         end
     end
-case 5  %Type of data:  Horizontal angle  (column 2 of data file)
+case 4  %Type of data:  Horizontal angle  (column 2 of data file)
     if get(handles.radio1,'Value')==1   %save data
         data=data(:,2)
         save(uiputfile,'data','table')  %save prompt
@@ -1567,7 +1467,7 @@ case 5  %Type of data:  Horizontal angle  (column 2 of data file)
             end
         end
     end
-case 6  %Type of data:  Pieces hit  (column 4 of data file)
+case 5  %Type of data:  Pieces hit  (column 4 of data file)
     if get(handles.radio1,'Value')==1   %save data
         data=data(:,4)
         save(uiputfile,'data','table')  %save prompt
@@ -1582,7 +1482,7 @@ case 6  %Type of data:  Pieces hit  (column 4 of data file)
             end
         end
     end
-case 8  %Type of data:  Distance between bounces
+case 6  %Type of data:  Distance between bounces
     %calculate distance between each bounce
     for k=1:size(data,2)
         temp{k}=zeros(size(data{k},1)-1,1);
