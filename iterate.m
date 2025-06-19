@@ -198,51 +198,65 @@ for j=1:size(table,1)
     end
 end
 %disp('found z (?)')
-%z
+%disp(z)
 zzz=z;   %backup of z for debugging
+
+% lucas's fix:
+% it seems like repeated roots are screwing things up, so add
+% a line to remove repeats from the z array
+
+% sort z (in ascending order), find the difference between each value
+% and build a truth array of which differences are greater than 1e-4
+zsort = sort(z);
+diffs = [true, abs(diff(zsort)) > 1e-4];
+z = zsort(diffs);
+
+%disp('removed repeated roots:')
+%disp(z)
 
 remove=[];  %index values of z for bad roots
 %remove roots that correspond to the particle going the wrong direction
 %from the collision (passing through the barrier)
 if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
-    %disp('vertical trajectory')
+    %%disp('vertical trajectory')
     for k=1:size(z,2)
         if (table{piece(table, z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
-            %disp('opposite direction for root:')
-            %z(k)
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
             remove=[remove,k];
         end
     end
 else
-    %disp('not vertical trajectory')
+    %%disp('not vertical trajectory')
     for k=1:size(z,2)   %deals with all non-vertical trajectories
         if (table{piece(table, z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
-            %disp('opposite direction for root:')
-            %z(k)
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
             remove=[remove,k]; 
         end
     end
 end
-z(remove)=[];
-%disp('removed bad roots (?)')
-%z
+z(remove)=[];   %disp('removed bad roots (?)')
+%disp(z)
 
 zz=z;   %backup of z (in case all roots are removed in next step)
     
-if n~=1
+if n~=1 & size(z, 2) > 1
+    %disp('removing current position roots')
     z=z(find(abs(z-data(n-1,1))>2*10^-4));  %remove root that corresponds to the particle's current position
+    %disp('removed current position root')
+    %disp(z)
 end
-%disp('removed current position root')
-%z
 
 %if no root is found increase tolerance on removal of root that corresponds
 %to no movement
-if size(z,2)==0    
+if size(z,2)==0
+    %disp('size(z, 2) was not equal to zero')
     z=zz;
     z=z(find(abs(z-data(n-1,1))>10^-8));  %remove root that corresponds to the particle's current position
+    %disp('no root was found and tolerance was incresed')
+    %disp(z)
 end
-%disp('no root was found and tolerance was incresed')
-%z
 
 %find the value of possible values of t that has minimum distance from
 %last point
@@ -276,7 +290,7 @@ else
     disp('here8')
 end
 %disp('sucessful in finding root, z = ')
-%data(n, 1)
+%disp(data(n, 1))
 told=data(n,1);   %told is t location of this collision
 data(n,4)=piece(table, told); %which piecewise function of the table t is located in
 newpiece=data(n,4);  %newpiece is the number of the piecewise function that is hit
@@ -346,12 +360,9 @@ if data(n,2)>pi
     data(n,2)=data(n,2)-2*pi;  %correcting horizontal angle if not principle value
     %disp('corrected horiz angel to be principle (2pi)')
 end
-xo = table{data(n,4),1}(data(n,1));
-%disp('got xo')
-yo = table{data(n,4),2}(data(n,1));
-%disp('got yo');
-ao = data(n,2);
-%disp('got ao');
+xo = table{data(n,4),1}(data(n,1)); %disp('got xo')
+yo = table{data(n,4),2}(data(n,1)); %disp('got yo');
+ao = data(n,2); %disp('got ao');
 
 if isTorus
     if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
