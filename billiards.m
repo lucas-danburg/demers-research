@@ -833,13 +833,21 @@ set(handles.add,'Visible','off')
 % --------------------------------------------------------------------
 function varargout = run_Callback(h, eventdata, handles, varargin)
 %called when run button is pressed for simulations
-global xo   %x-coordinate of last intersection
-global yo   %y-coordiante of last intersection
-global ao   %horizontal angle of last intersection
+
+if strcmp(get(handles.tablepopup,'Visible'),'on')   %if new table was created reset data and initial conditions
+    handles.data={};
+    handles.initcond={};
+end
+
+% these variables will not go in the array because they stay
+% the same for all initial conditions
 global nmax %maximum number of iterations
 global table
 global t
 syms t  %make t a symbolic variable
+
+nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
+
 %set initial values for x, y, and angle
 if get(handles.initradio1,'Value')==1   %if initial conditions are entered with x/y
     xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
@@ -855,7 +863,7 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        n_ts = 2 % this will become user input
+        n_ts = 2; % this will become user input
         n_iangles = 3; % this will become user input
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
@@ -882,7 +890,7 @@ else    %initial conditions are entered with t and incident angle
         % numpy's linspace function is much better
 
         [Ts, Iangles] = meshgrid(ts, iangles);
-        Ts = Ts(:)
+        Ts = Ts(:);
         Iangles = Iangles(:);
 
         for i = 1:size(Ts, 1)
@@ -908,29 +916,30 @@ else    %initial conditions are entered with t and incident angle
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
-        xo=table{piece(to),1}(to);    %get xo from entered value of to
-        yo=table{piece(to),2}(to);    %get yo from entered value of to
-        x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
-        y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
+        piece(table, to)
+        xo=table{piece(table, to),1}(to);    %get xo from entered value of to
+        yo=table{piece(table, to),2}(to);    %get yo from entered value of to
+
+        x=eval(char(table{piece(table, to),1})); %symbolic expression for x(t) for relevant piece
+        y=eval(char(table{piece(table, to),2})); %symbolic expression for y(t) for relevant piece
         at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+        at=double(at);
         ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
-        if ao>pi   %make angle between -pi and pi if not
+        if (ao>pi)   %make angle between -pi and pi if not
             ao=ao-2*pi;
         end
+
+        handles.initcond{1}=[xo,yo,ao, to, iangle]; %save initial conditions for later use
     end
 end
-   
-nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
+
 if handles.tables   %if saved table is present
     handles.table=[handles.stable;handles.table];   %merge saved and current tables
     handles.tables=0;   %no saved tables present now
 end
+
 table=handles.table;
 cla %clear preview
-if strcmp(get(handles.tablepopup,'Visible'),'on')   %if new table was created reset data and initial conditions
-    handles.data={};
-    handles.initcond={};
-end
 
 set(handles.preview,'Visible','off')
 set(handles.frame1,'Visible','off')
@@ -977,14 +986,13 @@ set(handles.stop,'Visible','on')    %turn on cancel button to stop iterations
 set(handles.stopl,'Visible','on')   %turn on label for cancel button
 set(handles.stopl,'String',['0/',num2str(nmax),' iterations completed'])    %set label for # iterations completed
 drawnow %force Matlab to update the GUI display
-handles.initcond{end+1}=[xo,yo,ao]; %save initial conditions for later use
 guidata(gcbo,handles);
 
 % FOR LOOP START (?)
 condit_n = 1;
 max_condits = size(handles.initcond, 2);
 for initcondi = handles.initcond
-    initcondi = initcondi{1}
+    initcondi = initcondi{1};
     xo = initcondi(1);
     yo = initcondi(2);
     ao = initcondi(3);
@@ -996,26 +1004,27 @@ for initcondi = handles.initcond
         y=eval(char(table{m,2}));   %symbolic function for y(t)
         deriv(m,1)=atan(diff(y,t)/diff(x,t));
     end
-    deriv
     data=zeros(nmax,4); %allocate space for all data
-    n=1    %n is current iteration being calculated
+    n=1;    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
-    disp('here')
+
     set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
     drawnow
     handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
     guidata(gcbo,handles);
-    global derivComp    %table of components needed for derivative of the billiard map
-    derivComp=zeros(nmax,4);   
 
-    while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
+    global derivComp    %table of components needed for derivative of the billiard map
+    derivComp=zeros(nmax,4);
+
+    % for each initial condition
+    while n<nmax && ~handles.done   %while we have not completed enough iterations and still not done
         derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
         derivComp(n,2)=yo;
         derivComp(n,3)=data(n,3);
         derivComp(n,4)=data(n,4);
 
-        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
+        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
         n=n+1;
         drawnow %force Matlab to update the GUI display
         handles=guidata(gcbo);
@@ -1031,10 +1040,14 @@ for initcondi = handles.initcond
         %     handles.done=1;   %prevents further calculations due to error
         % end
     end
+
     data=data(1:n,:);   %delete the rows of data that were not calculated
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
     guidata(gcbo,handles);
+
+    condit_n = condit_n + 1;
 end
+% END FOR LOOP
 
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
