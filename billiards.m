@@ -1026,12 +1026,13 @@ for initcondi = handles.initcond
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
 
-        try
-            iterate %find the location and angle of the next collision
-        catch   %if error in iterate then run the following:
-            'iterate error' %error message
-            handles.done=1;   %prevents further calculations due to error
-        end
+        iterate
+        % try
+        %     iterate %find the location and angle of the next collision
+        % catch   %if error in iterate then run the following:
+        %     'iterate error' %error message
+        %     handles.done=1;   %prevents further calculations due to error
+        % end
     end
 
     data=data(1:n,:);   %delete the rows of data that were not calculated
