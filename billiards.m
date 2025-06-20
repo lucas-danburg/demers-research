@@ -871,11 +871,12 @@ else    %initial conditions are entered with t and incident angle
         % TODO (?): billiard table is equivilent to trajectories on a certain topology?
 
         % generating t values between to and tmax
-        % we generate one additional value (an endpoint) and then remove it
-        % since the first t value is equivalent topologically to the last one, because
-        % t is arc length around the boundary.
-        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, n_ts + 1);
-        ts = ts(1:end - 1);
+        % this is the same process as for iangles below
+        tmin = handles.table{1, 3};
+        tmax = handles.table{size(handles.table, 1), 4};
+        tlen = tmax - tmin;
+        dt = tlen / n_ts;
+        ts = linspace(tmin + dt/2, tmax - dt/2, n_ts);
 
         % for generating angles, we remove BOTH endpoints, because an outgoing angle of
         % +/- pi/2 would be tangent to the boundary, and the trajectory would shoot outside
@@ -913,10 +914,10 @@ else    %initial conditions are entered with t and incident angle
         end
 
     else
+        %disp('entered t and phi manually')
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
-        piece(table, to)
         xo=table{piece(table, to),1}(to);    %get xo from entered value of to
         yo=table{piece(table, to),2}(to);    %get yo from entered value of to
 
