@@ -2,6 +2,15 @@ function table=squirclecell(w,r,rho,delta,to)
 global table
 table={12,5};
 
+if (rho + r) < (w/2)
+    error('The inner squircle and corner arcs combined are too small to block trajectories.');
+end
+    
+% delta constraints (morphing parameter between 0 and 1)
+if delta < 0 || delta > 1
+    error('Delta must be between 0 and 1.');
+end
+
     % Parameters
     L = w - 2*r;      % length of straight segment
     A = pi/2*r;       % length of arc (quarter circle)
