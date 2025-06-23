@@ -22,22 +22,26 @@ z=[];
 
 for j=1:size(table,1)
     %fun is tan(ao)*(x(t)-xo)-y(t)+yo
-    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);    
+    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);  
+    %disp('got fun')  
     a=table{j,3};   %lower bound of t for piece
     b=table{j,4};   %upper bound of t for piece
+    %disp('got bounds')
     
     %for pieces that are line segments
     if table{j,5}==1
-       root=fzero(fun,(a+b)/2); %use average of a and b as starting point for fzero
-       if root>=a & root<=b   %check if root is inside the interval
-           z=[z,root];  %add root to z
-       end
+        %disp('line segment')
+        root=fzero(fun,(a+b)/2); %use average of a and b as starting point for fzero
+        if root>=a & root<=b   %check if root is inside the interval
+            z=[z,root];  %add root to z
+        end
 
        
     %for pieces that are circular/elliptical arcs
     %xx1,xx2,yy1,yy2 are the x and y coordinates of the intersection of the line and arc with the
     %circle except the center of the circle is mapped to the origin
-    elseif table{j,5}==2    
+    elseif table{j,5}==2
+        %disp('arc')
         [cx,cy,rx,ry]=ellipseparam(table{j,1},table{j,2},table{j,3},table{j,4});  %finds x and y coordinates of center and radius of circle
         hit=0;  %indicates if the trajectory hits the arc or not
         if abs(mod(ao,pi)-pi/2)<10^-10 %deals specifically with vertical lines
@@ -63,6 +67,7 @@ for j=1:size(table,1)
             end
         end
         if hit  %if trajectory hits arc
+            %disp('hit detected')
             %taking in line function, evaluating at t inital and final
             lt=mod(atan2((table{j,2}(table{j,3})-cy)/ry,(table{j,1}(table{j,3})-cx)/rx),2*pi);   %angle from center to lower bound point
             ut=mod(atan2((table{j,2}(table{j,4})-cy)/ry,(table{j,1}(table{j,4})-cx)/rx),2*pi);   %angle from center to upper bound point
@@ -171,6 +176,7 @@ for j=1:size(table,1)
 
     %for pieces that are not segments or arcs
     else
+        %disp('not segment or arc')
         root=fzero(fun,a);  %use fzero starting at lower bound
         if root>a & root<b  %if root is between lower and upper bounds
             z=[z,root]; %add root to list
@@ -197,49 +203,78 @@ for j=1:size(table,1)
         end
     end
 end
+%disp('found z (?)')
+%disp(z)
 zzz=z;   %backup of z for debugging
+
+% lucas's fix:
+% it seems like repeated roots are screwing things up, so add
+% a line to remove repeats from the z array
+
+% sort z (in ascending order), find the difference between each value
+% and build a truth array of which differences are greater than 1e-4
+zsort = sort(z);
+diffs = [true, abs(diff(zsort)) > 1e-4];
+z = zsort(diffs);
+
+%disp('removed repeated roots:')
+%disp(z)
 
 remove=[];  %index values of z for bad roots
 %remove roots that correspond to the particle going the wrong direction
 %from the collision (passing through the barrier)
 if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
+    %%disp('vertical trajectory')
     for k=1:size(z,2)
-        if (table{piece(z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
+        if (table{piece(table, z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
             remove=[remove,k];
         end
     end
 else
+    %%disp('not vertical trajectory')
     for k=1:size(z,2)   %deals with all non-vertical trajectories
-        if (table{piece(z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
-            remove=[remove,k];
-            
+        if (table{piece(table, z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
+            remove=[remove,k]; 
         end
     end
 end
-
-z(remove)=[];
+z(remove)=[];   %disp('removed bad roots (?)')
+%disp(z)
 
 zz=z;   %backup of z (in case all roots are removed in next step)
     
-if n~=1
+if n~=1 & size(z, 2) > 1
+    %disp('removing current position roots')
     z=z(find(abs(z-data(n-1,1))>2*10^-4));  %remove root that corresponds to the particle's current position
+    %disp('removed current position root')
+    %disp(z)
 end
 
 %if no root is found increase tolerance on removal of root that corresponds
 %to no movement
-if size(z,2)==0    
+if size(z,2)==0
+    %disp('size(z, 2) was not equal to zero')
     z=zz;
     z=z(find(abs(z-data(n-1,1))>10^-8));  %remove root that corresponds to the particle's current position
+    %disp('no root was found and tolerance was incresed')
+    %disp(z)
 end
-    
+
 %find the value of possible values of t that has minimum distance from
 %last point
 
 
 if size(z,2)~=1
+    %size(z, 2)
+    %disp('size(z, 2) was not equal to 1')
     distance=zeros(1,size(z,2));
     for k=1:size(z,2)
-        i=piece(z(k));
+        %disp('calculating distances of root to current point')
+        i=piece(table, z(k));
         distance(1,k)=(xo-table{i,1}(z(k))).^2+(yo-table{i,2}(z(k))).^2;
     end
     distance(find(distance<10^-6))=inf;   %remove any values corresponding to no movement
@@ -257,8 +292,10 @@ if size(z,2)~=1
 else
     data(n,1)=z;  %store z value as correct t value for this iteration
 end
+%disp('sucessful in finding root, z = ')
+%disp(data(n, 1))
 told=data(n,1);   %told is t location of this collision
-data(n,4)=piece(told); %which piecewise function of the table t is located in
+data(n,4)=piece(table, told); %which piecewise function of the table t is located in
 newpiece=data(n,4);  %newpiece is the number of the piecewise function that is hit
 
 %determines if it hit a corner or not by checking if t is near the
@@ -266,11 +303,13 @@ newpiece=data(n,4);  %newpiece is the number of the piecewise function that is h
 %loop back onto itself there
 if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(table{newpiece,1}(table{newpiece,3})-table{newpiece,1}(table{newpiece,4}))>10^-8 | abs(table{newpiece,2}(table{newpiece,3})-table{newpiece,2}(table{newpiece,4}))>10^-8)
     %collision with corner detected
+    %disp('corner detected')
     j=1;    %index of other piece that makes up the corner
     x=inline(char(diff(eval(char(table{newpiece,1})),t)));   %x'(t) for new piece
     y=inline(char(diff(eval(char(table{newpiece,2})),t)));   %y'(t) for new piece
         
     if told-table{newpiece,3}<2*10^-4   %if hit the corner corresponding lower values of t for the piece
+        %disp('lower end of segment')
         while abs(table{j,1}(table{j,4})-table{newpiece,1}(told))>5*10^-4  | abs(table{j,2}(table{j,4})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
@@ -278,28 +317,39 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
         xj=inline(char(diff(eval(char(table{j,1})),t)));        %x'(t) for j piece 
         yj=inline(char(diff(eval(char(table{j,2})),t)));        %y'(t) for j piece 
             
-        %calculates the reflection angle for bouncing off the corner            
+        %calculates the reflection angle for bouncing off the corner
+        %disp('found other piece')
         data(n,2)=atan2(y(table{newpiece,3}),x(table{newpiece,3}))+atan2(yj(table{j,4}),xj(table{j,4}))-ao;
-
+        %disp('assigned data')
     else
+        %disp('upper end of segment')
         while abs(table{j,1}(table{j,3})-table{newpiece,1}(told))>5*10^-4 | abs(table{j,2}(table{j,3})-table{newpiece,2}(told))>5*10^-4  %checks if x and y distances from upper endpoint of piece to point are large
             j=j+1;  %trying to find piece that is the other side of the corner
         end
-            
+        
         xj=inline(char(diff(eval(char(table{j,1})),t)));        %x'(t) for j piece 
         yj=inline(char(diff(eval(char(table{j,2})),t)));        %y'(t) for j piece 
  
         %calculates the reflection angle for bouncing off the corner
+        %disp('found other piece')
         data(n,2)=atan2(y(table{newpiece,4}),x(table{newpiece,4}))+atan2(yj(table{j,3}),xj(table{j,3}))-ao;
-
-            
+        %disp('assigned data')
     end
     data(n,2)=mod(data(n,2),2*pi); %move reflection angle to the principel value
+    %disp('moved reflection angle')
     data(n,3)=NaN;  %store incident angle as non-existing for corners
+    %disp('stored inc = NaN')
 else
     %non-corner collision
-    derivMat = matlabFunction(deriv); % convert symbolic function to matlab function so it can handle Inf
-    at=derivMat(told);  %angle of tangent line to table at point of collision
+    derivMat = matlabFunction(deriv(newpiece));
+    if nargin(derivMat) == 0
+        at = derivMat();  % constant
+    else
+        at = derivMat(told);  % symbolic function of t
+    end
+    %derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
+    %at=derivMat(told);  %angle of tangent line to table at point of collision
+    %at=subs(deriv(newpiece),told);
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
     if data(n,3)>pi/2
@@ -307,11 +357,16 @@ else
     end
 end
 if data(n,2)>pi
+    %disp('data(n, 2) > pi')
     data(n,2)=data(n,2)-2*pi;  %correcting horizontal angle if not principle value
+    %disp('corrected horiz angel to be principle (2pi)')
 end
 xo = table{data(n,4),1}(data(n,1));
+%disp('got xo')
 yo = table{data(n,4),2}(data(n,1));
+%disp('got yo');
 ao = data(n,2);
+%disp('got ao');
 
 if isTorus
     if xo > w/2, xo = xo - w; elseif xo < -w/2, xo = xo + w; end
