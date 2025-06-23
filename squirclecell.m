@@ -11,6 +11,9 @@ if delta < 0 || delta > 1
     error('Delta must be between 0 and 1.');
 end
 
+%if (rho + r) < 
+
+
     % Parameters
     L = w - 2*r;      % length of straight segment
     A = pi/2*r;       % length of arc (quarter circle)
@@ -74,6 +77,18 @@ end
 
 % 9. Middle squircle:
 
+%alpha = ['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))'];
+
+% f(t) - circle
+%fx = ['cos(t/', num2str(rho), ')'];
+%fy = ['sin(t/', num2str(rho), ')'];
+
+% g(t) - square (substitute alpha_str directly)
+%gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')/cos', alpha];
+%gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')/cos', alpha];
+
+% 9. Middle squircle:
+
     table{9,1} = inline([num2str(delta*rho),'*cos((t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(pi*',num2str(rho),'/4)'], 't');
     table{9,2} = inline([num2str(delta*rho),'*sin((t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')'], 't');
     table{9,3} = table{8,4};
@@ -98,32 +113,6 @@ end
     table{12,4} = table{12,3} + pi*rho/2;
     table{12,5} = 3;
 
-% Compute perimeter (approximate numerically)
-t = linspace(0, 2*pi*rho, 1000); % or use your actual parameter range
-x = table{9,1}(t);
-y = table{9,2}(t);
-dx = diff(x);
-dy = diff(y);
-P = sum(sqrt(dx.^2 + dy.^2)); % Approximate perimeter
-
-C = 2*pi*r; % Ball circumference
-
-ratio = P/C;
-tol = 1e-6; % Tolerance for rational check
-
-% Check if ratio is close to a rational number
-[max_den, found] = deal(20, false);
-for den = 1:max_den
-    num = round(ratio*den);
-    if abs(ratio - num/den) < tol
-        found = true;
-        break;
-    end
-end
-
-if found
-    error('Periodic motion detected.');
-end
 
 hold on;
 for n=1:12
