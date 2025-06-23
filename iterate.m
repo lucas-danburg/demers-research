@@ -224,20 +224,20 @@ remove=[];  %index values of z for bad roots
 %remove roots that correspond to the particle going the wrong direction
 %from the collision (passing through the barrier)
 if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
-    %disp('vertical trajectory')
+    %%disp('vertical trajectory')
     for k=1:size(z,2)
         if (table{piece(table, z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
-            %disp('opposite direction for root:')
-            %disp(z(k))
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
             remove=[remove,k];
         end
     end
 else
-    %disp('not vertical trajectory')
+    %%disp('not vertical trajectory')
     for k=1:size(z,2)   %deals with all non-vertical trajectories
         if (table{piece(table, z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
-            %disp('opposite direction for root:')
-            %disp(z(k))
+            %%disp('opposite direction for root:')
+            %%disp(z(k))
             remove=[remove,k]; 
         end
     end
@@ -247,7 +247,7 @@ z(remove)=[];   %disp('removed bad roots (?)')
 
 zz=z;   %backup of z (in case all roots are removed in next step)
     
-if n > 1 & size(z, 2) > 1
+if n~=1 & size(z, 2) > 1
     %disp('removing current position roots')
     z=z(find(abs(z-data(n-1,1))>2*10^-4));  %remove root that corresponds to the particle's current position
     %disp('removed current position root')
@@ -256,8 +256,8 @@ end
 
 %if no root is found increase tolerance on removal of root that corresponds
 %to no movement
-if size(z,2)==0 & n>1
-    %disp('size(z, 2) was equal to zero')
+if size(z,2)==0
+    %disp('size(z, 2) was not equal to zero')
     z=zz;
     z=z(find(abs(z-data(n-1,1))>10^-8));  %remove root that corresponds to the particle's current position
     %disp('no root was found and tolerance was incresed')
@@ -266,6 +266,8 @@ end
 
 %find the value of possible values of t that has minimum distance from
 %last point
+
+
 if size(z,2)~=1
     %size(z, 2)
     %disp('size(z, 2) was not equal to 1')
@@ -339,8 +341,14 @@ if (told-table{newpiece,3}<2*10^-4 | table{newpiece,4}-told<2*10^-4) & (abs(tabl
     %disp('stored inc = NaN')
 else
     %non-corner collision
-    derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
-    at=derivMat(told);  %angle of tangent line to table at point of collision
+    derivMat = matlabFunction(deriv(newpiece));
+    if nargin(derivMat) == 0
+        at = derivMat();  % constant
+    else
+        at = derivMat(told);  % symbolic function of t
+    end
+    %derivMat = matlabFunction(deriv(newpiece)); % convert symbolic function to matlab function so it can handle Inf
+    %at=derivMat(told);  %angle of tangent line to table at point of collision
     %at=subs(deriv(newpiece),told);
     data(n,2)=mod(-ao+2*at,2*pi); %exiting horizontal angle
     data(n,3)=mod(-ao+pi/2+at,pi);  %incident angle
