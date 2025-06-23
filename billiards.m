@@ -24,7 +24,11 @@ function varargout = billiards(varargin)
 % BILLIARDS Application M-file for billiards.fig
 %    FIG = BILLIARDS launch billiards BILLIARDS.
 %    BILLIARDS('callback_name', ...) invoke the named callback.
+<<<<<<< HEAD
 % Last Modified by GUIDE v2.5 11-Jun-2025 13:18:49
+=======
+% Last Modified by GUIDE v2.5 20-Jun-2025 10:54:14
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
 if nargin == 0  % LAUNCH GUI
    
 	fig = openfig(mfilename,'reuse');
@@ -646,9 +650,17 @@ case 16 %kaplan billiard
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
 case 17  %Squircle Cell
+<<<<<<< HEAD
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Radius of inner circle')
+=======
+    set(handles.text21, 'String', 'Squircle: (Square)0-1(Circle)')
+    set(handles.param1l,'String','Width of square')
+    set(handles.param2l,'String','Radius of outer circles')
+    set(handles.param3l,'String','Inner radius')
+    set(handles.param4l,'String','Squircle')
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
@@ -841,8 +853,11 @@ global table
 global t
 syms t  %make t a symbolic variable
 
+<<<<<<< HEAD
 nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
 
+=======
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
 %set initial values for x, y, and angle
 if get(handles.initradio1,'Value')==1   %if initial conditions are entered with x/y
     xo=str2num(get(handles.inite1,'String'));   %get xo from entered initial conditions
@@ -853,6 +868,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
 
 % TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
+<<<<<<< HEAD
     % temporary for testing generation
     if get(handles.inite1, 'String') == 'generate'
         % phase space bounds
@@ -928,6 +944,24 @@ else    %initial conditions are entered with t and incident angle
     end
 end
 
+=======
+    to=str2num(get(handles.inite1,'String'));    %entered initial t value
+    iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
+    
+    xo=table{piece(to),1}(to);    %get xo from entered value of to
+    yo=table{piece(to),2}(to);    %get yo from entered value of to
+    
+    x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
+    y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
+    at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
+    ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
+    if ao>pi   %make angle between -pi and pi if not
+        ao=ao-2*pi;
+    end
+end
+   
+nmax=str2num(get(handles.nmax,'String'));   %get max number of iterations from entered number
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
 if handles.tables   %if saved table is present
     handles.table=[handles.stable;handles.table];   %merge saved and current tables
     handles.tables=0;   %no saved tables present now
@@ -951,7 +985,6 @@ set(handles.cy,'Visible','off')
 set(handles.init,'Visible','off')
 set(handles.initradio1,'Visible','off')
 set(handles.initradio2,'Visible','off')
-%set(handles.radiobutton9,'Visible','off')
 set(handles.inite3,'Visible','off')
 set(handles.inite2,'Visible','off')
 set(handles.initl3,'Visible','off')
@@ -982,6 +1015,7 @@ set(handles.stopl,'String',['0/',num2str(nmax),' iterations completed'])    %set
 drawnow %force Matlab to update the GUI display
 guidata(gcbo,handles);
 
+<<<<<<< HEAD
 % FOR LOOP START (?)
 condit_n = 1;
 max_condits = size(handles.initcond, 2);
@@ -1037,6 +1071,56 @@ for initcondi = handles.initcond
     data=data(1:n,:);   %delete the rows of data that were not calculated
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
     guidata(gcbo,handles);
+=======
+%d is initl3 of tangent line for each piece (d is a vector of functions of t)
+deriv=sym(zeros(size(table,1),1));
+for m=1:size(table,1)
+    x=eval(char(table{m,1}));   %symbolic function for x(t)
+    y=eval(char(table{m,2}));   %symbolic function for y(t)
+    deriv(m,1)=atan(diff(y,t)/diff(x,t));
+end
+data=zeros(nmax,4); %allocate space for all data
+n=1;    %n is current iteration being calculated
+iterate %calculates the 1st iteration based upon the initial conditions
+
+
+
+set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
+set(handles.stopl,'Visible','on')   %display cancel label
+drawnow
+handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
+guidata(gcbo,handles);
+
+global derivComp    %table of components needed for derivative of the billiard map
+derivComp=zeros(nmax,4);   
+
+while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
+    derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
+    derivComp(n,2)=yo;
+    derivComp(n,3)=data(n,3);
+    derivComp(n,4)=data(n,4);
+
+    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
+    n=n+1;
+    drawnow %force Matlab to update the GUI display
+    handles=guidata(gcbo);
+    xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
+    yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
+    ao=data(n-1,2); %horizontal angle of last intersection
+    
+    
+    try
+        iterate %find the location and angle of the next collision
+    catch   %if error in iterate then run the following:
+        'iterate error' %error message
+        handles.done=1;   %prevents further calculations due to error
+    end    
+end
+
+data=data(1:n,:);   %delete the rows of data that were not calculated
+handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
+guidata(gcbo,handles);
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
 
     condit_n = condit_n + 1;
 end
@@ -1078,12 +1162,14 @@ function varargout = stop_Callback(h, eventdata, handles, varargin)
 handles.done=1; %stops further calculations after current calculation is completed
 guidata(billiards,handles);
 
+
 % --------------------------------------------------------------------
 function varargout = analysisbutton_Callback(h, eventdata, handles, varargin)
 %creates analysis plots
 color='rkbgymcrkbgymcrkbgymcrkbgymc'; %order of colors for drawing plots, each initial condition gets a different color
 global derivComp
 global nmax
+
 %if options 1 or 2 are selected draw the table
 if get(handles.analysis,'Value')<=2
     figure    
@@ -1095,6 +1181,7 @@ if get(handles.analysis,'Value')<=2
             line([handles.table{n,1}(handles.table{n,3}),handles.table{n,1}(handles.table{n,4})],[handles.table{n,2}(handles.table{n,3}),handles.table{n,2}(handles.table{n,4})])   %darken horizontal and vertical lines
         end
     end
+
     %place text labels on plot describing value of t at intersection of
     %pieces (t=2 is such a label)
     text(handles.table{1,1}(handles.table{1,3}),handles.table{1,2}(handles.table{1,3}),['s=',num2str(handles.table{1,3})],'VerticalAlignment','top')  %put label for starting point
@@ -1201,10 +1288,6 @@ case 3  %graph of Lyapunov Exponent for Different Billiard domains
             r=str2num(get(handles.param3e,'String'));
             option=get(handles.extraoptions,'Value');
             kaplanlyap(r,option,derivComp,nmax,raw)
-        case 17 %run squirclecelllyap  if the domain is squirclecell 
-            r=str2num(get(handles.param2e,'String'));
-            rho = str2num(get(handles.param3e,'String'));
-            squirclecelllyap(r,rho,derivComp,nmax,raw)
        
     end
 case 4  %phase space:  s vs incident angle
@@ -1372,6 +1455,7 @@ case 12  %histogram of frequency of pieces hit
     end
 end
 
+
 % --------------------------------------------------------------------
 function varargout = radio1_Callback(h, eventdata, handles, varargin)
 %turn radio button 2 off so both are not on
@@ -1379,11 +1463,13 @@ function varargout = radio1_Callback(h, eventdata, handles, varargin)
 set(handles.radio2,'Value',0)
 
 
+
 % --------------------------------------------------------------------
 function varargout = radio2_Callback(h, eventdata, handles, varargin)
 %turn radio button 1 off so both are not on
 %controls if raw data should be saved or output to the command window
 set(handles.radio1,'Value',0)
+
 
 
 % --------------------------------------------------------------------
@@ -1411,8 +1497,109 @@ case 1  %Type of data:  Raw Data (t, horizontal, incident, piece)
             end
         end
     end
+<<<<<<< HEAD
 
 case 2  %Type of data:  x and y
+=======
+case 2  %type of data: positive lyapunov exponents
+    raw=1;
+    domain=get(handles.tablepopup,'Value');
+    switch domain  %check which billiard domain is being used
+        case 2  %if the table is a circle run circlelyap
+            r=str2num(get(handles.param1e,'String'));
+            limArr=circlelyap(r,derivComp,nmax,raw);
+        case 3 %the lyap function for non concentric circles does not exist
+            rx1=str2num(get(handles.param1e,'String'));
+            rx2=str2num(get(handles.param2e,'String'));
+            limArr=nonconcirclyap(rx1,rx2,derivComp,nmax,raw);
+        case 4  %if the table is an ellipse run ellipselyap
+            rx=str2num(get(handles.param1e,'String'));
+            ry=str2num(get(handles.param2e,'String'));
+            cx=str2num(get(handles.cx,'String'));
+            cy=str2num(get(handles.cy,'String'));
+            limArr=ellipselyap(rx,ry,cx,cy,derivComp,nmax,raw);
+        case 5 %the lyap function for limacon does not exist
+            msgbox(char('The Lyapunov Exponent Function for this domain does not exist.'))
+        case 6 %if the table is a lemon run lemonlyap
+            delta=str2num(get(handles.param1e,'String'));
+            limArr=lemonlyap(delta,derivComp,nmax,raw);
+        
+        case 7 %asym lemon
+            rx1=str2num(get(handles.param1e,'String'));
+            rx2=str2num(get(handles.param2e,'String'));
+            limArr=asymlemonlyap(rx1,rx2,derivComp,nmax,raw);        
+        
+        
+        
+        case 8   %if the table is a mushroom then run mushroomlyap
+            rx=str2num(get(handles.param1e,'String'));
+            circ=get(handles.extraoptions,'Value');
+            if circ==1    %if circular mushroom
+                ry=rx;    %use rx for ry
+            else    %if elliptical mushroom
+                ry=str2num(get(handles.param1e2,'String'));    %use entered value for ry
+            end     
+            cx=str2num(get(handles.cx,'String'));
+            cy=str2num(get(handles.cy,'String'));
+            limArr=mushroomlyap(rx,ry,derivComp,nmax,circ,cx,cy,raw);
+        case 9   %if the table is a double mushroom then run doubmushroomlyap
+            rx1=str2num(get(handles.param1e,'String'));  
+            ry1=str2num(get(handles.param1e2,'String')); 
+            circ=get(handles.extraoptions, 'Value');  
+            if circ==1    %if circular mushroom
+                rx2=str2num(get(handles.param1e,'String'));
+                ry2=rx2;    %use rx for ry
+            else    %if elliptical mushroom
+                rx2=str2num(get(handles.param1e2,'String'));
+                ry2=str2num(get(handles.param2e2,'String'));    %use entered value for ry
+            end     
+            cx=str2num(get(handles.cx,'String')); 
+            cy=str2num(get(handles.cy,'String'));
+            limArr=doubmushroomlyap(rx1,ry1,rx2,ry2,cx,cy,derivComp,nmax,circ,raw);
+        case 10 %if the billiard table is rounded mushroom run roundedmushroomlyap
+            circ=get(handles.extraoptions,'Value');
+            rx=str2num(get(handles.param1e,'String'));
+            if circ==1    %if circular mushroom
+                ry=rx;    %use rx for ry
+            else    %if elliptical mushroom
+                ry=str2num(get(handles.param1e2,'String'));    %use entered value for ry
+            end
+            cx=str2num(get(handles.cx,'String')); 
+            cy=str2num(get(handles.cy,'String'));
+            limArr=roundedmushroomlyap(rx,ry,derivComp,nmax,circ,cx,cy,raw);
+        case 11  %if the billiard table is a stadium then run stadiumlyap
+            type=get(handles.extraoptions,'Value');
+            circ=get(handles.extraoptions2,'Value');
+            rx=str2num(get(handles.param3e,'String'));
+            if circ==1    %if circular mushroom
+                ry=rx;    %use rx for ry
+            else    %if elliptical mushroom
+                ry=str2num(get(handles.param4e,'String'));    %use entered value for ry
+            end    
+            cx=str2num(get(handles.cx,'String'));
+            cy=str2num(get(handles.cy,'String'));
+            limArr=stadiumlyap(type,circ,rx,ry,derivComp,nmax,cx,cy,raw);
+        case 12 %for any polygon domain
+            msgbox(char('The Lyapunov Exponent for this domain is zero.'))
+        case 13 %for any rectangle domain
+            msgbox(char('The Lyapunov Exponent for this domain is zero.'))
+        case 14 %run sinailyap if the domain is sinai
+            r=str2num(get(handles.param2e,'String'));
+            limArr=sinailyap(r,derivComp,nmax,raw);
+        case 15 %run kaplanlyap if the domain is kaplan
+            r=str2num(get(handles.param3e,'String'));
+            option=get(handles.extraoptions,'Value');
+            limArr=kaplanlyap(r,option,derivComp,nmax,raw);
+
+    end
+    if get(handles.radio1,'Value')==1 && domain~=5 && domain~=11 && domain~=12 %save data
+        save(uiputfile,'limArr')  %save prompt
+    end
+    if get(handles.radio2,'Value')==1 && domain~=5 && domain~=11 && domain~=12 %export data to command window
+        disp(limArr)
+    end
+case 3  %Type of data:  x and y
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847
     for k=1:size(data,2)
         temp{k}=zeros(size(data,1),2);
         for n=1:size(data{k},1)
@@ -1929,3 +2116,48 @@ function preview_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to preview (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+<<<<<<< HEAD
+=======
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text20.
+function text20_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over databox.
+function databox_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to databox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over param2l.
+function param2l_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to param2l (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text21.
+function text21_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text21 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in analysis.
+function analysis_Callback(hObject, eventdata, handles)
+% hObject    handle to analysis (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns analysis contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from analysis
+>>>>>>> ae45f85ecb9547752e41a4df112d5937990ed847

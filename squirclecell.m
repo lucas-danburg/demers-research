@@ -1,6 +1,15 @@
 function table=squirclecell(w,r,rho,delta,to)
 global table
-table={};
+table={12,5};
+
+if (rho + r) < (w/2)
+    error('The inner squircle and corner arcs combined are too small to block trajectories.');
+end
+    
+% delta constraints (morphing parameter between 0 and 1)
+if delta < 0 || delta > 1
+    error('Delta must be between 0 and 1.');
+end
 
     % Parameters
     L = w - 2*r;      % length of straight segment
@@ -65,21 +74,29 @@ table={};
 
 % 9. Middle squircle:
 
-alpha = ['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))'];
-
-% f(t) - circle
-fx = ['cos(t/', num2str(rho), ')'];
-fy = ['sin(t/', num2str(rho), ')'];
-
-% g(t) - square (substitute alpha_str directly)
-gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')/cos', alpha];
-gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')/cos', alpha];
-
-table{9,1} = inline(['(', fx, ')*', num2str(delta), ' + (', gx, ')*', num2str(1-delta)], 't');
-table{9,2} = inline(['(', fy, ')*', num2str(delta), ' + (', gy, ')*', num2str(1-delta)], 't');
-table{9,3} = table{8,4};
-table{9,4} = table{9,3} + 2*pi*rho;
-table{9,5} = 3;
+    table{9,1} = inline([num2str(delta*rho),'*cos((t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(pi*',num2str(rho),'/4)'], 't');
+    table{9,2} = inline([num2str(delta*rho),'*sin((t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(t-(pi*',num2str(rho),'/4)-',num2str(table{8,4}),')'], 't');
+    table{9,3} = table{8,4};
+    table{9,4} = table{9,3} + pi*rho/2;
+    table{9,5} = 3;
+    
+    table{10,1} = inline([num2str(delta*rho),'*cos((t+(pi*',num2str(rho),'/4)-',num2str(table{9,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-t+(pi*',num2str(rho),'/4)+',num2str(table{9,4}),')'], 't');
+    table{10,2} = inline([num2str(delta*rho),'*sin((t+(pi*',num2str(rho),'/4)-',num2str(table{9,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(pi*',num2str(rho),'/4)'], 't');
+    table{10,3} = table{9,4};
+    table{10,4} = table{10,3} + pi*rho/2;
+    table{10,5} = 3;
+    
+    table{11,1} = inline([num2str(delta*rho),'*cos((t+(3*pi*',num2str(rho),'/4)-',num2str(table{10,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-pi*',num2str(rho),'/4)'], 't');
+    table{11,2} = inline([num2str(delta*rho),'*sin((t+(3*pi*',num2str(rho),'/4)-',num2str(table{10,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-t+(pi*',num2str(rho),'/4)+',num2str(table{10,4}),')'], 't');
+    table{11,3} = table{10,4};
+    table{11,4} = table{11,3} + pi*rho/2;
+    table{11,5} = 3;
+    
+    table{12,1} = inline([num2str(delta*rho),'*cos((t+(5*pi*',num2str(rho),'/4)-',num2str(table{11,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(t-(pi*',num2str(rho),'/4)-',num2str(table{11,4}),')'], 't');
+    table{12,2} = inline([num2str(delta*rho),'*sin((t+(5*pi*',num2str(rho),'/4)-',num2str(table{11,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-pi*',num2str(rho),'/4)'], 't');
+    table{12,3} = table{11,4};
+    table{12,4} = table{12,3} + pi*rho/2;
+    table{12,5} = 3;
 
 % Compute perimeter (approximate numerically)
 t = linspace(0, 2*pi*rho, 1000); % or use your actual parameter range
@@ -109,7 +126,7 @@ if found
 end
 
 hold on;
-for n=1:9
+for n=1:12
 ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
 end
 axis equal
