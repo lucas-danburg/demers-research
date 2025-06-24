@@ -1,5 +1,6 @@
 function varargout = billiards(varargin)
 %Program to simulate arbitrary classical billiard systems.
+
 %handles.table  saved table
 %   columns:  x(t), y(t), lower bound for t, upper bound for t
 %   each row is a different piece of the table
@@ -9,6 +10,7 @@ function varargout = billiards(varargin)
 %   1 row for each iteration
 %handles.initcond  cell array of all initial conditions (used primarily for
 %   drawing configuration space)
+%   [xo, yo, ao, to, iangle]
 %handles.tables  boolean saying whether or not tables are saved for creating overlapping
 %   tables
 %handles.stable saved table that should not be edited when creating
@@ -412,9 +414,9 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 		end
     case 17  %Squircle Cell
         if handles.tables
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')),handles.to);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), handles.to);
         else
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')), 0);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), 0);
         end
     end
     
@@ -644,12 +646,9 @@ case 16 %kaplan billiard
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
 case 17  %Squircle Cell
-    set(handles.text21, 'String', 'Convex: (Square)0-Deleta-1(Circle)')
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
-    set(handles.param3l,'String','Inner radius')
-    set(handles.param4l,'String','Squircle')
-    set(handles.param4e,'String','Delta')
+    set(handles.param3l,'String','Radius of inner circle')
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
