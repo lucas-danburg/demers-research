@@ -236,7 +236,7 @@ remove=[];  %index values of z for bad roots
 if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
     %disp('vertical trajectory (10^-2 precision)')
     for k=1:size(z,2)
-        if (table{piece(table, z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
+        if (table{piece(z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
             %disp('opposite direction for root:')
             %disp(z(k))
             remove=[remove,k];
@@ -245,7 +245,7 @@ if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
 else
     %disp('not vertical trajectory (10^-2 precision)')
     for k=1:size(z,2)   %deals with all non-vertical trajectories
-        if (table{piece(table, z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
+        if (table{piece(z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
             %disp('opposite direction for root:')
             %disp(z(k))
             remove=[remove,k]; 
@@ -282,7 +282,7 @@ if size(z,2)~=1
     distance=zeros(1,size(z,2));
     for k=1:size(z,2)
         %disp('calculating distances of root to current point')
-        i=piece(table, z(k));
+        i=piece(z(k));
         distance(1,k)=(xo-table{i,1}(z(k))).^2+(yo-table{i,2}(z(k))).^2;
     end
     distance(find(distance<10^-6))=inf;   %remove any values corresponding to no movement
@@ -303,7 +303,7 @@ end
 %disp('sucessful in finding root, z = ')
 %disp(data(n, 1))
 told=data(n,1);   %told is t location of this collision
-data(n,4)=piece(table, told); %which piecewise function of the table t is located in
+data(n,4)=piece(told); %which piecewise function of the table t is located in
 newpiece=data(n,4);  %newpiece is the number of the piecewise function that is hit
 
 %determines if it hit a corner or not by checking if t is near the
