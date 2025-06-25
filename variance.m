@@ -93,7 +93,7 @@ function xs = x(ts, table)
     xs = zeros(1, length(ts));
     for ii = 1:length(ts)
         t = ts(ii);
-        xf = table{piece(table, t), 1};
+        xf = table{piece(t), 1};
         xs(ii) = xf(t);
     end
 end
@@ -103,7 +103,7 @@ function ys = y(ts, table)
     ys = zeros(1, length(ts));
     for ii = 1:length(ts)
         t = ts(ii);
-        yf = table{piece(table, t), 2};
+        yf = table{piece(t), 2};
         ys(ii) = yf(t);
     end
 end

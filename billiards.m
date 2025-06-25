@@ -895,11 +895,11 @@ else    %initial conditions are entered with t and incident angle
             to = Ts(i);
             iangle = Iangles(i);
 
-            xo=table{piece(table, to),1}(to);    %get xo from entered value of to
-            yo=table{piece(table, to),2}(to);    %get yo from entered value of to
+            xo=table{piece(to),1}(to);    %get xo from entered value of to
+            yo=table{piece(to),2}(to);    %get yo from entered value of to
 
-            x=eval(char(table{piece(table, to),1})); %symbolic expression for x(t) for relevant piece
-            y=eval(char(table{piece(table, to),2})); %symbolic expression for y(t) for relevant piece
+            x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
+            y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
             at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
             at=double(at);
             ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
@@ -914,12 +914,11 @@ else    %initial conditions are entered with t and incident angle
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
-        piece(table, to)
-        xo=table{piece(table, to),1}(to);    %get xo from entered value of to
-        yo=table{piece(table, to),2}(to);    %get yo from entered value of to
+        xo=table{piece(to),1}(to);    %get xo from entered value of to
+        yo=table{piece(to),2}(to);    %get yo from entered value of to
 
-        x=eval(char(table{piece(table, to),1})); %symbolic expression for x(t) for relevant piece
-        y=eval(char(table{piece(table, to),2})); %symbolic expression for y(t) for relevant piece
+        x=eval(char(table{piece(to),1})); %symbolic expression for x(t) for relevant piece
+        y=eval(char(table{piece(to),2})); %symbolic expression for y(t) for relevant piece
         at=atan2(subs(diff(y,t),to),subs(diff(x,t),to));  %tangent angle to the curve at the selected point
         at=double(at);
         ao=mod(iangle-pi/2+at,2*pi); %calculation of horizontal angle using selected incident angle and tangent angle at the point 
