@@ -47,8 +47,9 @@ for j=1:size(table,1)
         if abs(mod(ao,pi)-pi/2)<10^-10 %deals specifically with vertical lines
             if cx-rx<=xo & xo<=cx+rx
                 hit=1;
-                xx1=xo;
-                xx2=xo;
+                xx1=xo - cx;
+                xx2=xo - cx;
+                %disp('yy1 becomes imaginary here: (?)')
                 yy1=-sqrt(rx^2*(1-xx1^2/ry^2));
                 yy2=sqrt(rx^2*(1-xx2^2/ry^2));
             end
@@ -71,7 +72,7 @@ for j=1:size(table,1)
             %taking in line function, evaluating at t inital and final
             lt=mod(atan2((table{j,2}(table{j,3})-cy)/ry,(table{j,1}(table{j,3})-cx)/rx),2*pi);   %angle from center to lower bound point
             ut=mod(atan2((table{j,2}(table{j,4})-cy)/ry,(table{j,1}(table{j,4})-cx)/rx),2*pi);   %angle from center to upper bound point
-
+            %disp('got past first atan2s')
             %if lt or ut are 0 or 2pi then you must pick either 0 or 2pi
             %depending on if it leaves the positive x-axis going up or down
             if abs(lt)<.001 | abs(lt-2*pi)<.001
@@ -97,6 +98,7 @@ for j=1:size(table,1)
                     lt=lt-2*pi;
                 end
                 
+                %disp('finding alpha')
                 alpha=atan2(yy1/ry,xx1/rx);
                 if abs(alpha)<pi/2      %gives intersection if alpha is in right half plane
                     z=[z,abs(alpha-lt)/pi*(b-a)+a];    %add root that is the same percent from lower to upper arc bounds as t
@@ -104,18 +106,21 @@ for j=1:size(table,1)
                 alpha=atan2(yy2/ry,xx2/rx);
                 if abs(alpha)<pi/2      %gives intersection if alpha is in right half plane
                     z=[z,abs(alpha-lt)/pi*(b-a)+a];    %add root that is the same percent from lower to upper arc bounds as t
-                end                
+                end
+                %disp('found')
                 
             %find value of z for all regular cases (except above special
             %one)
-            else   
+            else
+                %disp('finding beta')
                 % checking if drawm arc spans a jump in the argument
-               xmid = table{j,1}((table{j,3} + table{j,4})/2);
-               ymid = table{j,2}((table{j,3} + table{j,4})/2);
-               beta = mod((atan2((ymid-cy)/ry ,(xmid-cx)/rx)),2*pi); %beta is angle of midpoint, measured from the center of the arc
-               uswitch = 0;
-               lswitch = 0;
-               if lt < ut
+                xmid = table{j,1}((table{j,3} + table{j,4})/2);
+                ymid = table{j,2}((table{j,3} + table{j,4})/2);
+                beta = mod((atan2((ymid-cy)/ry ,(xmid-cx)/rx)),2*pi); %beta is angle of midpoint, measured from the center of the arc
+                %disp('first beta atan2')
+                uswitch = 0;
+                lswitch = 0;
+                if lt < ut
                     if (lt >= beta || beta >= ut)
                         ut = ut - 2*pi;  %reassigns ut a negative value in order to make angular values in drawn arc continuous
                         uswitch = 1;
@@ -129,7 +134,9 @@ for j=1:size(table,1)
                 end
                 %alpha is one of the 2 angles to the intersection point
                 %measured from the center of the arc
-                alpha=mod(atan2(yy1/ry,xx1/rx),2*pi); 
+                %disp('attempting second beta atan2')
+                alpha=mod(atan2(yy1/ry,xx1/rx),2*pi);
+                %disp('second beta atan2')
                 
                 %if switched ut or lt need to adjust alpha the same way
                 if uswitch == 1
@@ -152,7 +159,9 @@ for j=1:size(table,1)
                 end
                 %2nd root will be found corresponding to the other intersection
                 %point
+                %disp('attempting third beta atan2')
                 alpha=mod(atan2(yy2/ry,xx2/rx),2*pi);
+                %disp('third beta atan2')
                 %if switched ut or lt need to adjust alpha the same way
                 if uswitch == 1
                     if alpha > ut + 2*pi
