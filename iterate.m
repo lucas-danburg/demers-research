@@ -22,8 +22,8 @@ z=[];
 
 for j=1:size(table,1)
     %fun is tan(ao)*(x(t)-xo)-y(t)+yo
-    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);  
-    %disp('got fun')  
+    fun=inline([num2str(tan(ao)),'*(',char(table{j,1}),'-',num2str(xo),')-(',char(table{j,2}),')+',num2str(yo)]);
+    %disp('got fun')
     a=table{j,3};   %lower bound of t for piece
     b=table{j,4};   %upper bound of t for piece
     %disp('got bounds')
@@ -44,7 +44,8 @@ for j=1:size(table,1)
         %disp('arc')
         [cx,cy,rx,ry]=ellipseparam(table{j,1},table{j,2},table{j,3},table{j,4});  %finds x and y coordinates of center and radius of circle
         hit=0;  %indicates if the trajectory hits the arc or not
-        if abs(mod(ao,pi)-pi/2)<10^-10 %deals specifically with vertical lines
+        if abs(mod(ao,pi)-pi/2)<10^-2 %deals specifically with vertical lines
+            %disp('vertical trajectory (10^-2 precision)')
             if cx-rx<=xo & xo<=cx+rx
                 hit=1;
                 xx1=xo - cx;
@@ -233,7 +234,7 @@ remove=[];  %index values of z for bad roots
 %remove roots that correspond to the particle going the wrong direction
 %from the collision (passing through the barrier)
 if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
-    %%disp('vertical trajectory')
+    %disp('vertical trajectory (10^-2 precision)')
     for k=1:size(z,2)
         if (table{piece(table, z(k)),2}(z(k))-yo)*sin(ao)<0    %if root corresponds to opposite direction
             %%disp('opposite direction for root:')
@@ -242,7 +243,7 @@ if abs(mod(ao,pi)-pi/2)<10^-2  %deals specially with vertical trajectories
         end
     end
 else
-    %%disp('not vertical trajectory')
+    %disp('not vertical trajectory (10^-2 precision)')
     for k=1:size(z,2)   %deals with all non-vertical trajectories
         if (table{piece(table, z(k)),1}(z(k))-xo)*cos(ao)<-5*10^-6    %if root corresponds to opposite direction
             %%disp('opposite direction for root:')
