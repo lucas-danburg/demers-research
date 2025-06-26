@@ -35,16 +35,6 @@ if delta*rho/sqrt(2) + (1 - delta)*pi/4*rho >= w/2 - r/sqrt(2)
    error('Decrease rho, Increase w or r')
 end
 
-
-%if w < pi/4*(rho) + 2*r
-    %error('Middle squircle (square) or outer circles too big: Decrease rho or r')
-%end
-
-%if w < 2*rho + r
-    %error('Middle Squircle or outer circles too big: Decrease rho or r')
-%end
-
-
     % 1. Bottom-right arc: center at (w/2, -w/2), angle = pi/2 to pi
     table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');  % X(t)
     table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't'); % Y(t)
@@ -100,18 +90,6 @@ end
     table{8,3}=table{7,4};
     table{8,4}=table{8,3} + L;
     table{8,5}=1;
-
-% 9. Middle squircle:
-
-%alpha = ['(t/', num2str(rho), ' - pi/2*round(2*t/(', num2str(rho), '*pi)))'];
-
-% f(t) - circle
-%fx = ['cos(t/', num2str(rho), ')'];
-%fy = ['sin(t/', num2str(rho), ')'];
-
-% g(t) - square (substitute alpha_str directly)
-%gx = ['(2*pi*', num2str(rho), '/8)*cos(t/', num2str(rho), ')/cos', alpha];
-%gy = ['(2*pi*', num2str(rho), '/8)*sin(t/', num2str(rho), ')/cos', alpha];
 
 % 9. Middle squircle:
 
