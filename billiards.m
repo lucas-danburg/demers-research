@@ -139,6 +139,7 @@ set(handles.saved,'Enable','off')   %turn off file, save data
 set(handles.savet,'Enable','off')   %turn off file, save table
 set(handles.newinitmenu,'Enable','off') %turn off file, new initial conditions
 set(handles.initphase,'Enable','off')   %ghost button for selecting initial conditions from phase space
+set(handles.text21,'Visible','off') %TEST
 % --------------------------------------------------------------------
 function varargout = opent_Callback(h, eventdata, handles, varargin)
 %open a saved table
@@ -231,7 +232,7 @@ set(handles.frame3,'Visible','on')
 set(handles.frame4,'Visible','on')
 set(handles.frame5,'Visible','on')
 set(handles.frame6,'Visible','on')
-
+set(handles.text21,'Visible','off') %TEST
 % --------------------------------------------------------------------
 function varargout = savet_Callback(h, eventdata, handles, varargin)
 %save current table
@@ -666,6 +667,7 @@ set(handles.param2e2,'Visible','off')
 set(handles.param4e2,'Visible','off')
 set(handles.extraoptions,'Visible','off')
 set(handles.extraoptions2,'Visible','off')
+set(handles.text21,'Visible','off') %TEST
 if get(handles.tablepopup,'Value')==1 | get(handles.tablepopup,'Value')==16 %if selection is 'Select table' or 'Custom' do not display following objects
     set(handles.center,'Visible','off')
     set(handles.cxl,'Visible','off')
@@ -757,6 +759,9 @@ case 8 %Moon
 case 17 %Squircle Cell
     set(handles.param3l,'Visible','on')
     set(handles.param3e,'Visible','on')
+    set(handles.param4l,'Visible','on')
+    set(handles.param4e,'Visible','on')
+    set(handles.text21,'Visible','on') %TEST
 end
 % --------------------------------------------------------------------
 function varargout = custom_Callback(h, eventdata, handles, varargin)
@@ -852,7 +857,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
-    handles.initcond{1}=[xo,yo,ao, "didnt calculate it", "didnt calculate it"]; %save initial conditions for later use
+    handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
@@ -869,11 +874,12 @@ else    %initial conditions are entered with t and incident angle
         % TODO (?): billiard table is equivilent to trajectories on a certain topology?
 
         % generating t values between to and tmax
-        % we generate one additional value (an endpoint) and then remove it
-        % since the first t value is equivalent topologically to the last one, because
-        % t is arc length around the boundary.
-        ts = linspace(handles.table{1, 3}, handles.table{size(handles.table, 1), 4}, n_ts + 1);
-        ts = ts(1:end - 1);
+        % this is the same process as for iangles below
+        tmin = handles.table{1, 3};
+        tmax = handles.table{size(handles.table, 1), 4};
+        tlen = tmax - tmin;
+        dt = tlen / n_ts;
+        ts = linspace(tmin + dt/2, tmax - dt/2, n_ts);
 
         % for generating angles, we remove BOTH endpoints, because an outgoing angle of
         % +/- pi/2 would be tangent to the boundary, and the trajectory would shoot outside
@@ -911,6 +917,7 @@ else    %initial conditions are entered with t and incident angle
         end
 
     else
+        %disp('entered t and phi manually')
         to=str2num(get(handles.inite1,'String'));    %entered initial t value
         iangle=str2num(get(handles.inite3,'String'));    %entered initial incident angle
         
@@ -977,6 +984,7 @@ set(handles.param2e2,'Visible','off')
 set(handles.extraoptions,'Visible','off')
 set(handles.extraoptions2,'Visible','off')
 set(handles.add,'Visible','off')
+set(handles.text21,'Visible','off') %TEST
 
 set(handles.stop,'Visible','on')    %turn on cancel button to stop iterations
 set(handles.stopl,'Visible','on')   %turn on label for cancel button
@@ -1493,13 +1501,12 @@ case 6  %Type of data:  Distance between bounces
         save(uiputfile,'data','table')  %save prompt
     end
     if get(handles.radio2,'Value')==1   %export data to command window
-        variance(handles.initcond, handles.data, handles.table)
         if size(data,2)==1  %if single initial conditions just display data
             disp(data{1})
         else
             for k=1:size(data,2)    %if multiple initial conditions display each with a header
-                %disp(['Initial Conditions ',num2str(k)])    %header for output
-                %disp(data{k})  %data for current initial conditions
+                disp(['Initial Conditions ',num2str(k)])    %header for output
+                disp(data{k})  %data for current initial conditions
             end
         end
     end
@@ -1569,6 +1576,7 @@ set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
 %set(handles.radiobutton9,'Visible','on')
+set(handles.text21,'Visible','off') %TEST
 if get(handles.initradio1,'Value')+get(handles.initradio2,'Value')==1   %if either x,y or t coordinates are selected for entering initial conditions
     set(handles.inite3,'String','')
     set(handles.inite3,'Visible','on')
@@ -1929,5 +1937,37 @@ set(handles.initphase,'Visible','on')
 % --- Executes on mouse press over axes background.
 function preview_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to preview (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text20.
+function text20_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over databox.
+function databox_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to databox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over param2l.
+function param2l_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to param2l (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over text21.
+function text21_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to text21 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
