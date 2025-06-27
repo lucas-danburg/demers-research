@@ -1,7 +1,9 @@
-function sigma2s = variance(initcond, data, table)
+function [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params)
     % data is the handles.data object
     % initcond is the handles.initcond object
+    % generation is the handles.generation object
     % table is handles.table, needed to find the length of the boundary
+    % table_params is the handles.table_params object
 
     datamat = cat(3, data{:}); % convert the cell array to a 3d normal array
     % this array now has shape (# of iterations, 4, # of initial conditions)
@@ -26,84 +28,154 @@ function sigma2s = variance(initcond, data, table)
 
     datamat = cat(1, initcondmat_3d, datamat); % now prepend the initial conditions
     % to the iteration data along the first dimension (the iteration dimension)
+    %disp('original operations')
+    % now reshape the data
+    % the current shape is [# of iterations + 1, 2, # of initial conditions]
+    % but in order to perform a proper 2d integral over t and phi for each iteration,
+    % the t and phi values need to be placed into a proper grid.
+    % the new shape should be:
+    %   [# of iterations, number of initial t values, number of initial phi values, 2]
+    % so that on the outside there is an array of length (# of iterations), and each element
+    % of the array is a n_ts x n_iangles matrix, and each element of the matrix is a tuple of
+    % length 2 containing (t, phi).
+    n_ts = generation(1);
+    n_iangles = generation(2);
 
-    ts_0 = datamat(1, 1, :); % first iteration, get t only, all initial condtions
-    ts_0 = ts_0(:); % flatten to 1d array
-    iangles_0 = datamat(1, 2, :); % same for phi/incident angle
-    iangles_0 = iangles_0(:);
 
-    ts_1 = datamat(2, 1, :); % second iteration, get t only, all initial condtions
-    ts_1 = ts_1(:); % flatten to 1d array
-    % now ts_0 and iangles_0 are equivalent to
-    % `[Ts_0, Iangles_0] = meshgrid(ts, iangles)
-    %  ts_0 = Ts_0(:)
-    %  iangles_0 = Iangles_0(:)`
-    % as in lines ~930 - 940 of billiards.m
+    matdat = cell(n_iter + 1, n_ts, n_iangles); % initialize a cell array of appropriate shape
+    matdat_t = cell(n_iter + 1); % make another one holding actual matrices of t values only
+    % also get a matrix of phi values of all the initial conditions, this is needed for the integrals
+    Iangles_0 = [];
+    for i = 1:(n_iter + 1) % for each iteration + 1
+        ts_i = datamat(i, 1, :); % ith iteration, t only, all initial conditions
+        ts_i = ts_i(:); % flatten to a 1d array just in case
 
-    % NOW we can finally calculate some things
-    % perhaps a good first step is picking an f function. it must be 1) integrable over the 
-    % phase space X, so the integral has to be finite. it will also be helpful if it has an
-    % expectation value of 0, so we may need to "normalize" it, or shift it such that its
-    % integral over X dm is 0.
-    % try to pick f(t, phi) = sqrt((x1 - x)^2 + (y1 - y)^2)
-    f = sqrt((x(ts_1, table) - x(ts_0, table)).^2 + (y(ts_1, table) - y(ts_0, table)).^2);
-    avf = E(ts_0, iangles_0, f, table); % average tau
-    f = @(ts_i, ts_f) sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - avf; % construct normalized f
+        iangles_i = datamat(i, 2, :); % same for phi/incident angle
+        iangles_i = iangles_i(:);
+
+        % now ts_i and iangles_i are equivalent to
+        % `[Ts_i, Iangles_i] = meshgrid(ts, iangles)
+        %  ts_i = Ts_i(:)
+        %  iangles_i = Iangles_i(:)`
+        % as in lines ~930 - 940 of billiards.m
+        % now we want to recover them into the same form as Ts_i and Iangles_i
+        % that is, size(ts_i) = [n_ts * n_iangles, 1] currently, and we want to transform
+        % it into Ts_i with size = [n_ts, n_iangles]
+
+        Ts_i = reshape(ts_i, n_iangles, n_ts);
+        Iangles_i = reshape(iangles_i, n_iangles, n_ts);
+
+        if i == 1
+            Iangles_0 = Iangles_i;
+        end
+
+        % and now array the Ts_i and Iangles_i values into a ts_i x iangles_i meshgrid
+        % where each element is [t, phi]
+        % disclaimer: github copilot generated the following line and i dont know
+        % what UniformOutput or false do
+        M = arrayfun(@(t, phi) [t, phi], Ts_i, Iangles_i, 'UniformOutput', false);
+        Mt = cell2mat(arrayfun(@(t, phi) t, Ts_i, Iangles_i, 'UniformOutput', false));
+        matdat{i} = M;
+        matdat_t{i} = Mt;
+    end
+    % this good because now we can use this to construct a new cell array with
+    % length = # of iterations where each cell is a n_ts x n_iangles matrix
+    % and each element of the matrix is the value of an observable f(t, phi).
+    % this can then be handled nicely with 2d integrals of f
+
+    % create f = the euclidian distance between collisions
+    w = table_params(1);
+    r = table_params(2);
+    rho = table_params(3);
+    delta = table_params(4);
+    tau_bar = pi * Q(w, delta, r, rho) / dQ(w, delta, r, rho);
+    f = @(ts_i, ts_f) sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - tau_bar; % construct normalized f
+
     sigma2s = zeros(1, n_iter); % calculate sigma2 for each iteration
-    f0_vals = f(ts_0, ts_1);
+    second_terms= zeros(1, n_iter); % also keep track of each term in the sum
+    f0_vals = f(matdat_t{1}, matdat_t{2});
     % for each iteration
     for i = 1:n_iter
-        % get the current t's
-        ts_i = datamat(i, 1, :);
-        ts_i = ts_i(:);
+        % get the current t matrix
+        Ti = matdat_t{i};
 
         % get the next t's, since these are T^i(t, phi) values
         % with those values, we can compute tau = f(ts, ts1)
-        ts_i1 = datamat(i + 1, 1, :);
-        ts_i1 = ts_i1(:);
+        Ti1 = matdat_t{i + 1};
 
-        sigma2s(i) = 2 * (sum(sigma2s(1:i-1)) + E(ts_0, iangles_0, f0_vals .* f(ts_i, ts_i1), table));
+        second_terms(i) = E(Iangles_0, f0_vals .* f(Ti, Ti1), table_params);
+        sigma2s(i) = sum(second_terms(1:i));
     end
 
     % finally, add the first integral to each element
-    sigma2s = sigma2s + E(ts_0, iangles_0, f0_vals.^2, table);
+    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2, table_params);
 end
 
 % HELPER FUNCTIONS:
-function int_Xdm = E(ts_0, iangles_0, f_vals, table)
+function int_Xdm = E(Iangles_0, f_vals, table_params)
     % function to take the integral over phase space X (t, phi) of some function values
     % f_vals times delta-m (with respect to the measure m)
 
-    t_lower = table{1, 3};
-    t_upper = table{size(table, 1), 4};
-    t_len = t_upper - t_lower; % and iangle-len = pi
-    n_init = size(ts_0, 1); % number of initial conditions
+    [n_ts, n_iangles] = size(Iangles_0);
 
-    % we cannot find delta-phi or delta-t on their own but we can find their product
-    % dphi = pi / n_phi             dt = t_len / n_t
-    % dphi*dt = pi * t_len / (n_phi * n_t) = pi * t_len / n_init
-    dpdt = pi * t_len / n_init;
-    dm = 1 / (2 * t_len) .* cos(iangles_0) .* dpdt; % t_len is the boundary length dQ as well
+    w = table_params(1);
+    r = table_params(2);
+    rho = table_params(3);
+    delta = table_params(4);
 
-    int_Xdm = sum(f_vals(:) .* dm(:)); % sum (integral) of f^2(t, phi) dm
+    t_len = dQ(w, delta, r, rho); % and iangle-len = pi
+    dt = t_len / n_ts;
+
+    dphi = pi / n_iangles;
+
+    dpdt = dphi * dt;
+
+    int_Xdm = simpsons(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)), dpdt); % sum (integral) of f(t, phi)*dm
+end
+
+function F = simpsons(M, dxdy)
+    % function to approximate the 2d integral of a function using Simpson's rule.
+    % M is an n x m matrix (or a vector) of function values, where n and m must be odd.
+    % dxdy is the product of the widths of the variables of integration,
+    % so if the outer integral is from a to b, dy = (b - a) / number of y values.
+    [n, m] = size(M);
+
+    if mod(n, 2) == 0 | mod(m, 2) == 0 % if n and m are not odd, complain
+        error(sprintf('Error in function `simpsons` in file `variance.m`: an input with size [%d, %d] was passed, but both dimensions must be odd.', n, m))
+    end
+
+    wn = [repmat([2, 4], 1, (n - 1) / 2), 1]; % row vector of weights for the row values
+    wn(1, 1) = 1;
+    wm = [repmat([2; 4], (m - 1) / 2, 1); 1]; % column vector of weight for column values
+    wm(1, 1) = 1;
+    W = wm .* wn; % matrix of weights
+    F = dxdy / 9 * sum(sum(W .* M));
 end
 
 function xs = x(ts, table)
-    % function to get an x value (or values) from a t value
-    xs = zeros(1, length(ts));
-    for ii = 1:length(ts)
-        t = ts(ii);
-        xf = table{piece(t), 1};
-        xs(ii) = xf(t);
+    %disp('x() called')
+    % function to get an x value (or values) from a t value (or values)
+    [n, m] = size(ts);
+    xs = zeros(n, m);
+    for ii = 1:n
+        for jj = 1:m
+            t = ts(ii, jj);
+            xf = table{piece(t), 1};
+            xs(ii, jj) = xf(t);
+        end
     end
 end
 
 function ys = y(ts, table)
-    % function to get a y value (or values) from a t value
-    ys = zeros(1, length(ts));
-    for ii = 1:length(ts)
-        t = ts(ii);
-        yf = table{piece(t), 2};
-        ys(ii) = yf(t);
+    %disp('y() called')
+    % function to get a y value (or values) from a t value (or values)
+    [n, m] = size(ts);
+    ys = zeros(n, m);
+    for ii = 1:n
+        for jj = 1:m
+            t = ts(ii, jj);
+            yf = table{piece(t), 2};
+            ys(ii, jj) = yf(t);
+        end
     end
 end

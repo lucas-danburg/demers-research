@@ -11,6 +11,10 @@ function varargout = billiards(varargin)
 %handles.initcond  cell array of all initial conditions (used primarily for
 %   drawing configuration space)
 %   [xo, yo, ao, to, iangle]
+%handles.generation     trajectory generation data
+%   [number of t values, number of phi values]
+%handles.table_params   only for the squircle cell, contains
+%   [w, r, rho, delta]
 %handles.tables  boolean saying whether or not tables are saved for creating overlapping
 %   tables
 %handles.stable saved table that should not be edited when creating
@@ -414,11 +418,17 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 			kaplan(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),str2num(get(handles.param3e,'String')),get(handles.extraoptions,'Value'),0);
 		end
     case 17  %Squircle Cell
+        w = str2num(get(handles.param1e,'String'));
+        r = str2num(get(handles.param2e,'String'));
+        rho = str2num(get(handles.param3e,'String'));
+        delta = str2num(get(handles.param4e,'String'));
         if handles.tables
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')),handles.to);
+            squirclecell(w, r, rho, delta, handles.to);
         else
-            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')), 0);
+            squirclecell(w, r, rho, delta, 0);
         end
+
+        handles.table_params = [w, r, rho, delta];
     end
     
     handles.table=table;
@@ -857,6 +867,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
+    handles.generation = [1, 1];
     handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
@@ -866,8 +877,9 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        n_ts = 2; % this will become user input
+        n_ts = 3; % this will become user input
         n_iangles = 3; % this will become user input
+        handles.generation = [n_ts, n_iangles];
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
 
@@ -933,6 +945,7 @@ else    %initial conditions are entered with t and incident angle
             ao=ao-2*pi;
         end
 
+        handles.generation = [1, 1];
         handles.initcond{1}=[xo,yo,ao, to, iangle]; %save initial conditions for later use
     end
 end
@@ -1051,6 +1064,21 @@ for initcondi = handles.initcond
     condit_n = condit_n + 1;
 end
 % END FOR LOOP
+
+% if there were multiple initial conditions, automatically calculate and graph
+% the variance and each term in the sum in the variance
+if numel(handles.initcond) > 1
+    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
+
+    % graph variance first
+    figure
+    plot([0:(nmax - 1)], var)
+    title('Variance')
+
+    figure
+    plot([0:(nmax - 1)], terms)
+    title('Variance terms')
+end
 
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
