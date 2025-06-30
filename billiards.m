@@ -906,7 +906,7 @@ else    %initial conditions are entered with t and incident angle
         % numpy's linspace function is much better
 
         [Ts, Iangles] = meshgrid(ts, iangles);
-        Ts = Ts(:)
+        Ts = Ts(:);
         Iangles = Iangles(:);
 
         for i = 1:size(Ts, 1)
@@ -1009,7 +1009,7 @@ guidata(gcbo,handles);
 condit_n = 1;
 max_condits = size(handles.initcond, 2);
 for initcondi = handles.initcond
-    initcondi = initcondi{1}
+    initcondi = initcondi{1};
     xo = initcondi(1);
     yo = initcondi(2);
     ao = initcondi(3);
@@ -1021,9 +1021,9 @@ for initcondi = handles.initcond
         y=eval(char(table{m,2}));   %symbolic function for y(t)
         deriv(m,1)=atan(diff(y,t)/diff(x,t));
     end
-    deriv
+    
     data=zeros(nmax,4); %allocate space for all data
-    n=1    %n is current iteration being calculated
+    n=1;    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
     %disp('here')
     set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
