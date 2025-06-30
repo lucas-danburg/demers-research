@@ -142,7 +142,7 @@ set(handles.saved,'Enable','off')   %turn off file, save data
 set(handles.savet,'Enable','off')   %turn off file, save table
 set(handles.newinitmenu,'Enable','off') %turn off file, new initial conditions
 set(handles.initphase,'Enable','off')   %ghost button for selecting initial conditions from phase space
-set(handles.text21,'Visible','off') %TEST
+set(handles.text23,'Visible','off') %TEST
 set(handles.radiobutton9,'Visible','off') %TEST
 % --------------------------------------------------------------------
 function varargout = opent_Callback(h, eventdata, handles, varargin)
@@ -236,7 +236,7 @@ set(handles.frame3,'Visible','on')
 set(handles.frame4,'Visible','on')
 set(handles.frame5,'Visible','on')
 set(handles.frame6,'Visible','on')
-set(handles.text21,'Visible','off') %TEST
+set(handles.text23,'Visible','off') %TEST
 % --------------------------------------------------------------------
 function varargout = savet_Callback(h, eventdata, handles, varargin)
 %save current table
@@ -657,7 +657,7 @@ case 16 %kaplan billiard
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
 case 17  %Squircle Cell
-    set(handles.text21, 'String', 'Squircle: (Square)0-1(Circle)')
+    set(handles.text23,'String','Squircle: (Square)0-1(Circle)')
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Inner radius')
@@ -676,7 +676,7 @@ set(handles.param2e2,'Visible','off')
 set(handles.param4e2,'Visible','off')
 set(handles.extraoptions,'Visible','off')
 set(handles.extraoptions2,'Visible','off')
-set(handles.text21,'Visible','off') %TEST
+set(handles.text23,'Visible','off') %TEST
 set(handles.radiobutton9,'Visible','off') %TEST
 if get(handles.tablepopup,'Value')==1 | get(handles.tablepopup,'Value')==16 %if selection is 'Select table' or 'Custom' do not display following objects
     set(handles.center,'Visible','off')
@@ -771,7 +771,7 @@ case 17 %Squircle Cell
     set(handles.param3e,'Visible','on')
     set(handles.param4l,'Visible','on')
     set(handles.param4e,'Visible','on')
-    set(handles.text21,'Visible','on') %TEST
+    set(handles.text23,'Visible','on') %TEST
     set(handles.radiobutton9, 'Visible','on')
 end
 % --------------------------------------------------------------------
@@ -998,8 +998,7 @@ set(handles.param2e2,'Visible','off')
 set(handles.extraoptions,'Visible','off')
 set(handles.extraoptions2,'Visible','off')
 set(handles.add,'Visible','off')
-set(handles.text21,'Visible','off') %TEST
-
+set(handles.text23,'Visible','off') %TEST
 set(handles.stop,'Visible','on')    %turn on cancel button to stop iterations
 set(handles.stopl,'Visible','on')   %turn on label for cancel button
 set(handles.stopl,'String',['0/',num2str(nmax),' iterations completed'])    %set label for # iterations completed
@@ -1605,7 +1604,7 @@ set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
 set(handles.radiobutton9,'Visible','off')
-set(handles.text21,'Visible','off') %TEST
+set(handles.text23,'Visible','off') %TEST
 if get(handles.initradio1,'Value')+get(handles.initradio2,'Value')==1   %if either x,y or t coordinates are selected for entering initial conditions
     set(handles.inite3,'String','')
     set(handles.inite3,'Visible','on')
@@ -1992,14 +1991,6 @@ function databox_ButtonDownFcn(hObject, eventdata, handles)
 % --- Otherwise, executes on mouse press in 5 pixel border or over param2l.
 function param2l_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to param2l (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over text21.
-function text21_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to text21 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
