@@ -2,16 +2,21 @@ function table=squirclecell(w,r,rho,delta,to)
 global table
 table={12,5};
 
-if (rho + r) < (w/2)
-    error('The inner squircle and corner arcs combined are too small to block trajectories.');
+%Initial conditions to avoid infinite horizon case
+if r >= w/2
+    error('Decrease radius of outer circles.');
 end
-    
-% delta constraints (morphing parameter between 0 and 1)
+
+if r <= w*sqrt(2)/4
+    error('Increase radius of outer circles.');
+end
+
+
+% delta constraints (Delta must be between 0 and 1)
 if delta < 0 || delta > 1
     error('Delta must be between 0 and 1.');
 end
 
-%if (rho + r) < 
 
 
     % Parameters
@@ -19,6 +24,27 @@ end
     A = pi/2*r;       % length of arc (quarter circle)
     to = 0;           % starting parameter for first arc
     
+
+%Initial conditions to avoid infinite horizon case  P2
+
+if delta*(rho) + (1-delta)*rho*pi/4 <= L/2
+   error('Increase rho, or decrease w or r.');
+end    
+
+if delta*rho/sqrt(2) + (1 - delta)*pi/4*rho >= w/2 - r/sqrt(2)
+   error('Decrease rho, Increase w or r')
+end
+
+
+%if w < pi/4*(rho) + 2*r
+    %error('Middle squircle (square) or outer circles too big: Decrease rho or r')
+%end
+
+%if w < 2*rho + r
+    %error('Middle Squircle or outer circles too big: Decrease rho or r')
+%end
+
+
     % 1. Bottom-right arc: center at (w/2, -w/2), angle = pi/2 to pi
     table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');  % X(t)
     table{1,2} = inline([num2str(-w/2), '+', num2str(r), '*sin(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't'); % Y(t)
@@ -121,3 +147,5 @@ end
 axis equal
 hold off
 end
+
+
