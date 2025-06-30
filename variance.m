@@ -130,6 +130,9 @@ function int_Xdm = E(Iangles_0, f_vals, table_params)
 
     dpdt = dphi * dt;
 
+    % TODO: add density
+    % dm = 1/2dQ * cos(phi) * sqrt(x'^2 + y'^2) * dpdt
+    % density matrix
     int_Xdm = simpsons(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)), dpdt); % sum (integral) of f(t, phi)*dm
 end
 
@@ -148,7 +151,7 @@ function F = simpsons(M, dxdy)
     wn(1, 1) = 1;
     wm = [repmat([2; 4], (m - 1) / 2, 1); 1]; % column vector of weight for column values
     wm(1, 1) = 1;
-    W = wm .* wn; % matrix of weights
+    W = wm * wn; % matrix of weights
     F = dxdy / 9 * sum(sum(W .* M));
 end
 
