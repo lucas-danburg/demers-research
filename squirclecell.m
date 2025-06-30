@@ -8,7 +8,7 @@ if r >= w/2
 end
 
 if r <= w*sqrt(2)/4
-    error('Increase width of square or decrease radius of outer/inner circles.');
+    error('Decrease width of square or increase radius of outer/inner circles.');
 end
 
 
