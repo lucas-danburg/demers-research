@@ -662,7 +662,6 @@ case 17  %Squircle Cell
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Inner radius')
     set(handles.param4l,'String','Squircle')
-    set(handles.param4e,'String','Delta')
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
