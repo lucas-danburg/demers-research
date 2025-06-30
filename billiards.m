@@ -105,7 +105,6 @@ set(handles.run,'Visible','on')
 set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
-%set(handles.radiobutton9, 'Visible','on')
 set(handles.inite3,'String','')
 set(handles.inite3,'Visible','on')
 set(handles.inite2,'String','')
@@ -144,6 +143,7 @@ set(handles.savet,'Enable','off')   %turn off file, save table
 set(handles.newinitmenu,'Enable','off') %turn off file, new initial conditions
 set(handles.initphase,'Enable','off')   %ghost button for selecting initial conditions from phase space
 set(handles.text21,'Visible','off') %TEST
+set(handles.radiobutton9,'Visible','off') %TEST
 % --------------------------------------------------------------------
 function varargout = opent_Callback(h, eventdata, handles, varargin)
 %open a saved table
@@ -185,7 +185,7 @@ set(handles.cy,'Visible','off')
 set(handles.init,'Visible','off')
 set(handles.initradio1,'Visible','off')
 set(handles.initradio2,'Visible','off')
-%set(handles.radiobutton9, 'Visible','off')
+set(handles.radiobutton9, 'Visible','off')
 set(handles.inite3,'Visible','off')
 set(handles.inite2,'Visible','off')
 set(handles.initl3,'Visible','off')
@@ -677,6 +677,7 @@ set(handles.param4e2,'Visible','off')
 set(handles.extraoptions,'Visible','off')
 set(handles.extraoptions2,'Visible','off')
 set(handles.text21,'Visible','off') %TEST
+set(handles.radiobutton9,'Visible','off') %TEST
 if get(handles.tablepopup,'Value')==1 | get(handles.tablepopup,'Value')==16 %if selection is 'Select table' or 'Custom' do not display following objects
     set(handles.center,'Visible','off')
     set(handles.cxl,'Visible','off')
@@ -771,6 +772,7 @@ case 17 %Squircle Cell
     set(handles.param4l,'Visible','on')
     set(handles.param4e,'Visible','on')
     set(handles.text21,'Visible','on') %TEST
+    set(handles.radiobutton9, 'Visible','on')
 end
 % --------------------------------------------------------------------
 function varargout = custom_Callback(h, eventdata, handles, varargin)
@@ -872,7 +874,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
 % TODO: else if for t and incident
 else    %initial conditions are entered with t and incident angle
     % temporary for testing generation
-    if get(handles.inite1, 'String') == 'generate'
+    if get(handles.radiobutton9, 'Value')==1
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
@@ -972,7 +974,7 @@ set(handles.cy,'Visible','off')
 set(handles.init,'Visible','off')
 set(handles.initradio1,'Visible','off')
 set(handles.initradio2,'Visible','off')
-%set(handles.radiobutton9,'Visible','off')
+set(handles.radiobutton9,'Visible','off')
 set(handles.inite3,'Visible','off')
 set(handles.inite2,'Visible','off')
 set(handles.initl3,'Visible','off')
@@ -1602,7 +1604,7 @@ set(handles.run,'Visible','on')
 set(handles.init,'Visible','on')
 set(handles.initradio1,'Visible','on')
 set(handles.initradio2,'Visible','on')
-%set(handles.radiobutton9,'Visible','on')
+set(handles.radiobutton9,'Visible','off')
 set(handles.text21,'Visible','off') %TEST
 if get(handles.initradio1,'Value')+get(handles.initradio2,'Value')==1   %if either x,y or t coordinates are selected for entering initial conditions
     set(handles.inite3,'String','')
@@ -1934,6 +1936,7 @@ set(handles.inite3,'String',num2str(initc(2)))  %enter angle into edit fields
 function initradio1_Callback(hObject, eventdata, handles)
 set(handles.initradio1,'Value',1)
 set(handles.initradio2,'Value',0)
+set(handles.radiobutton9,'Value',0)
 %set(handles.radiobutton9,'Value',0)
 set(handles.inite1,'Visible','on')
 set(handles.inite2,'Visible','on')
@@ -1949,12 +1952,13 @@ set(handles.initphase,'Visible','off')
 function initradio2_Callback(hObject, eventdata, handles)
 set(handles.initradio2,'Value',1)
 set(handles.initradio1,'Value',0)
+set(handles.radiobutton9,'Value',0)
 %set(handles.radiobutton9,'Value',0)
 set(handles.inite1,'Visible','on')
 set(handles.inite2,'Visible','off')
 set(handles.inite3,'Visible','on')
 set(handles.initl1,'Visible','on')
-set(handles.initl2,'Visible','of')
+set(handles.initl2,'Visible','off')
 set(handles.initl3,'Visible','on')
 set(handles.initl1,'String','t')
 set(handles.initl3,'String','Incident Angle')
@@ -1998,3 +2002,22 @@ function text21_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to text21 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in radiobutton9.
+function radiobutton9_Callback(hObject, eventdata, handles)
+set(handles.radiobutton9,'Value',1)
+set(handles.initradio1,'Value',0)
+set(handles.initradio2,'Value',0)
+set(handles.inite1,'Visible','off')
+set(handles.inite2,'Visible','off')
+set(handles.inite3,'Visible','off')
+set(handles.initl1,'Visible','off')
+set(handles.initl2,'Visible','off')
+set(handles.initl3,'Visible','off')
+set(handles.initphase,'Visible','off')
+% hObject    handle to radiobutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of radiobutton9
