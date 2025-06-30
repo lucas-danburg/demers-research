@@ -4,11 +4,11 @@ table={12,5};
 
 %Initial conditions to avoid infinite horizon case
 if r >= w/2
-    error('Decrease radius of outer circles.');
+    error('Increase width of square or decrease radius of outer/inner circles.');
 end
 
 if r <= w*sqrt(2)/4
-    error('Increase radius of outer circles.');
+    error('Increase width of square or decrease radius of outer/inner circles.');
 end
 
 
