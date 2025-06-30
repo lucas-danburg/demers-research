@@ -93,6 +93,8 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     sigma2s = zeros(1, n_iter); % calculate sigma2 for each iteration
     second_terms= zeros(1, n_iter); % also keep track of each term in the sum
+    T1 = matdat_t{1};
+    Dens = D(T1, table);
     f0_vals = f(matdat_t{1}, matdat_t{2});
     % for each iteration
     for i = 1:n_iter
@@ -103,12 +105,12 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
         % with those values, we can compute tau = f(ts, ts1)
         Ti1 = matdat_t{i + 1};
 
-        second_terms(i) = E(Iangles_0, f0_vals .* f(Ti, Ti1), table_params);
+        second_terms(i) = E(Iangles_0, f0_vals .* f(Ti, Ti1) .* Dens, table_params);
         sigma2s(i) = sum(second_terms(1:i));
     end
 
     % finally, add the first integral to each element
-    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2, table_params);
+    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params);
 end
 
 % HELPER FUNCTIONS:
@@ -130,7 +132,29 @@ function int_Xdm = E(Iangles_0, f_vals, table_params)
 
     dpdt = dphi * dt;
 
+    % TODO: add density
+    % dm = 1/2dQ * cos(phi) * sqrt(x'^2 + y'^2) * dpdt
+    % density matrix
+
     int_Xdm = simpsons(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)), dpdt); % sum (integral) of f(t, phi)*dm
+end
+
+function density = D(T, table)
+    % function to get a density matrix corresponding to a matrix of t-values
+    % this is in case of tables where t is not an arc length parameter
+    [n, m] = size(T);
+    density = zeros(n, m);
+    for i = 1:n
+        for j = 1:m
+            tval = T(i, j);
+            p = piece(tval);
+            syms t;
+            x=inline(char(diff(eval(char(table{p, 1})),t)));   %x'(t) for piece
+            y=inline(char(diff(eval(char(table{p, 2})),t)));   %y'(t) for piece
+            density(i, j) = sqrt(x(tval)^2 + y(tval)^2);
+        end
+    end
+    %disp('did density')
 end
 
 function F = simpsons(M, dxdy)
@@ -148,7 +172,7 @@ function F = simpsons(M, dxdy)
     wn(1, 1) = 1;
     wm = [repmat([2; 4], (m - 1) / 2, 1); 1]; % column vector of weight for column values
     wm(1, 1) = 1;
-    W = wm .* wn; % matrix of weights
+    W = wm * wn; % matrix of weights
     F = dxdy / 9 * sum(sum(W .* M));
 end
 
