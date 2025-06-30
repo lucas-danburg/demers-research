@@ -11,10 +11,6 @@ function varargout = billiards(varargin)
 %handles.initcond  cell array of all initial conditions (used primarily for
 %   drawing configuration space)
 %   [xo, yo, ao, to, iangle]
-%handles.generation     trajectory generation data
-%   [number of t values, number of phi values]
-%handles.table_params   only for the squircle cell, contains
-%   [w, r, rho, delta]
 %handles.tables  boolean saying whether or not tables are saved for creating overlapping
 %   tables
 %handles.stable saved table that should not be edited when creating
@@ -418,17 +414,11 @@ if (strcmp(get(handles.param1e,'Visible'),'off') | ~(strcmp(get(handles.param1e,
 			kaplan(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')),str2num(get(handles.param3e,'String')),get(handles.extraoptions,'Value'),0);
 		end
     case 17  %Squircle Cell
-        w = str2num(get(handles.param1e,'String'));
-        r = str2num(get(handles.param2e,'String'));
-        rho = str2num(get(handles.param3e,'String'));
-        delta = str2num(get(handles.param4e,'String'));
         if handles.tables
-            squirclecell(w, r, rho, delta, handles.to);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')),handles.to);
         else
-            squirclecell(w, r, rho, delta, 0);
+            squirclecell(str2num(get(handles.param1e,'String')),str2num(get(handles.param2e,'String')), str2num(get(handles.param3e,'String')), str2num(get(handles.param4e,'String')), 0);
         end
-
-        handles.table_params = [w, r, rho, delta];
     end
     
     handles.table=table;
@@ -657,12 +647,11 @@ case 16 %kaplan billiard
 	set(handles.param2l,'String','Height of semi-circle')
 	set(handles.param3l,'String','Radius')
 case 17  %Squircle Cell
-    set(handles.text21, 'String', 'Convex: (Square)0-Deleta-1(Circle)')
+    set(handles.text21, 'String', 'Squircle: (Square)0-1(Circle)')
     set(handles.param1l,'String','Width of square')
     set(handles.param2l,'String','Radius of outer circles')
     set(handles.param3l,'String','Inner radius')
     set(handles.param4l,'String','Squircle')
-    set(handles.param4e,'String','Delta')
 case 18 %Custom table
     drawtable(gcbo);    %launch drawtable program
     set(handles.Billiards,'Visible','off')  %hide billiards
@@ -867,7 +856,6 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
-    handles.generation = [1, 1];
     handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
@@ -877,9 +865,8 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        n_ts = 11; % this will become user input
-        n_iangles = 11; % this will become user input
-        handles.generation = [n_ts, n_iangles];
+        n_ts = 2; % this will become user input
+        n_iangles = 3; % this will become user input
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
 
@@ -945,7 +932,6 @@ else    %initial conditions are entered with t and incident angle
             ao=ao-2*pi;
         end
 
-        handles.generation = [1, 1];
         handles.initcond{1}=[xo,yo,ao, to, iangle]; %save initial conditions for later use
     end
 end
@@ -1021,11 +1007,10 @@ for initcondi = handles.initcond
         y=eval(char(table{m,2}));   %symbolic function for y(t)
         deriv(m,1)=atan(diff(y,t)/diff(x,t));
     end
-    
     data=zeros(nmax,4); %allocate space for all data
     n=1;    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
-    %disp('here')
+
     set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
     drawnow
@@ -1050,13 +1035,12 @@ for initcondi = handles.initcond
         yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
         ao=data(n-1,2); %horizontal angle of last intersection
 
-        iterate
-        % try
-        %     iterate %find the location and angle of the next collision
-        % catch   %if error in iterate then run the following:
-        %     'iterate error' %error message
-        %     handles.done=1;   %prevents further calculations due to error
-        % end
+        try
+            iterate %find the location and angle of the next collision
+        catch   %if error in iterate then run the following:
+            'iterate error' %error message
+            handles.done=1;   %prevents further calculations due to error
+        end
     end
 
     data=data(1:n,:);   %delete the rows of data that were not calculated
@@ -1066,21 +1050,6 @@ for initcondi = handles.initcond
     condit_n = condit_n + 1;
 end
 % END FOR LOOP
-
-% if there were multiple initial conditions, automatically calculate and graph
-% the variance and each term in the sum in the variance
-if numel(handles.initcond) > 1
-    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
-
-    % graph variance first
-    figure
-    plot([0:(nmax - 1)], var)
-    title('Variance')
-
-    figure
-    plot([0:(nmax - 1)], terms)
-    title('Variance terms')
-end
 
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
