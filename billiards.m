@@ -877,8 +877,8 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        n_ts = 101; % this will become user input
-        n_iangles = 101; % this will become user input
+        n_ts = 11; % this will become user input
+        n_iangles = 11; % this will become user input
         handles.generation = [n_ts, n_iangles];
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
@@ -1025,7 +1025,7 @@ for initcondi = handles.initcond
     data=zeros(nmax,4); %allocate space for all data
     n=1    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
-    disp('here')
+    %disp('here')
     set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
     set(handles.stopl,'Visible','on')   %display cancel label
     drawnow
