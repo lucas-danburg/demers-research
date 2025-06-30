@@ -878,8 +878,8 @@ else    %initial conditions are entered with t and incident angle
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
         
-        n_ts = 11; % this will become user input
-        n_iangles = 11; % this will become user input
+        n_ts = str2num(get(handles.inite1,'String')); % this will become user input
+        n_iangles = str2num(get(handles.inite2,'String')); % this will become user input
         handles.generation = [n_ts, n_iangles];
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
@@ -1067,17 +1067,28 @@ end
 
 % if there were multiple initial conditions, automatically calculate and graph
 % the variance and each term in the sum in the variance
-if numel(handles.initcond) > 1
+if get(handles.radiobutton9, 'Value')==1
+    n_ts = handles.generation(1);
+    n_iangles = handles.generation(2);
+    w = handles.table_params(1);
+    r = handles.table_params(2);
+    rho = handles.table_params(3);
+    delta = handles.table_params(4);
+
     [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
 
     % graph variance first
     figure
     plot([0:(nmax - 1)], var)
-    title('Variance')
+    title(sprintf('Variance for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], terms)
-    title('Variance terms')
+    title(sprintf('Variance terms for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
+
+    figure
+    plot([0:(nmax - 1)], log(terms))
+    title(sprintf('ln(Variance terms) for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
 end
 
 set(handles.stop,'Visible','off')
@@ -2000,11 +2011,13 @@ function radiobutton9_Callback(hObject, eventdata, handles)
 set(handles.radiobutton9,'Value',1)
 set(handles.initradio1,'Value',0)
 set(handles.initradio2,'Value',0)
-set(handles.inite1,'Visible','off')
-set(handles.inite2,'Visible','off')
+set(handles.inite1,'Visible','on')
+set(handles.inite2,'Visible','on')
 set(handles.inite3,'Visible','off')
-set(handles.initl1,'Visible','off')
-set(handles.initl2,'Visible','off')
+set(handles.initl1,'Visible','on')
+set(handles.initl1, 'String', '# of t-values (MUST BE ODD)')
+set(handles.initl2,'Visible','on')
+set(handles.initl2, 'String', '# of phi-values (MUST BE ODD)')
 set(handles.initl3,'Visible','off')
 set(handles.initphase,'Visible','off')
 % hObject    handle to radiobutton9 (see GCBO)
