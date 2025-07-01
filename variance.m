@@ -146,7 +146,7 @@ function density = D(T, table)
     density = zeros(n, m);
     x = cell(size(table, 1), 1);
     y = cell(size(table, 1), 1);
-    for p = 1:n_pieces
+    for p = 1:size(table, 1)
         syms t;
         x{p} = inline(char(diff(eval(char(table{p, 1})), t)));   %x'(t) for piece
         y{p} = inline(char(diff(eval(char(table{p, 2})), t)));   %y'(t) for piece
