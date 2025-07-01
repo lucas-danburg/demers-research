@@ -96,6 +96,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     T1 = matdat_t{1};
     Dens = D(T1, table);
     f0_vals = f(matdat_t{1}, matdat_t{2});
+    f0_vals(isnan(f0_vals)) = 0; % set NaN tau values to zero to resolve missing data
     % for each iteration
     for i = 1:n_iter
         % get the current t matrix
@@ -105,20 +106,20 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
         % with those values, we can compute tau = f(ts, ts1)
         Ti1 = matdat_t{i + 1};
 
-        second_terms(i) = E(Iangles_0, f0_vals .* f(Ti, Ti1) .* Dens, table_params);
+        fi_vals = f(Ti, Ti1);
+        fi_vals(isnan(fi_vals)) = 0; % set NaN tau values to zero to resolve missing data
+        second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation);
         sigma2s(i) = sum(second_terms(1:i));
     end
 
     % finally, add the first integral to each element
-    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params);
+    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params, generation);
 end
 
 % HELPER FUNCTIONS:
-function int_Xdm = E(Iangles_0, f_vals, table_params)
+function int_Xdm = E(Iangles_0, f_vals, table_params, generation)
     % function to take the integral over phase space X (t, phi) of some function values
     % f_vals times delta-m (with respect to the measure m)
-
-    [n_ts, n_iangles] = size(Iangles_0);
 
     w = table_params(1);
     r = table_params(2);
@@ -126,17 +127,13 @@ function int_Xdm = E(Iangles_0, f_vals, table_params)
     delta = table_params(4);
 
     t_len = dQ(w, delta, r, rho); % and iangle-len = pi
-    dt = t_len / n_ts;
+    % we can find dpdt without knowing dp or dt themselves
+    % dt = t_len / n_ts
+    % dp = pi / n_iangles
+    % dpdt = t_len * pi / n_trajectories
+    dpdt = t_len * pi / generation(3);
 
-    dphi = pi / n_iangles;
-
-    dpdt = dphi * dt;
-
-    % TODO: add density
-    % dm = 1/2dQ * cos(phi) * sqrt(x'^2 + y'^2) * dpdt
-    % density matrix
-
-    int_Xdm = simpsons(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)), dpdt); % sum (integral) of f(t, phi)*dm
+    int_Xdm = sum(sum(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)) .* dpdt)); % sum (integral) of f(t, phi)*dm
 end
 
 function density = D(T, table)

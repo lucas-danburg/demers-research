@@ -12,7 +12,7 @@ function varargout = billiards(varargin)
 %   drawing configuration space)
 %   [xo, yo, ao, to, iangle]
 %handles.generation     trajectory generation data
-%   [number of t values, number of phi values]
+%   [number of t values, number of phi values, number of total data points (# t vals * # phi vals)]
 %handles.table_params   only for the squircle cell, contains
 %   [w, r, rho, delta]
 %handles.tables  boolean saying whether or not tables are saved for creating overlapping
@@ -868,7 +868,7 @@ if get(handles.initradio1,'Value')==1   %if initial conditions are entered with 
     yo=str2num(get(handles.inite2,'String'));   %get yo from entered initial conditions
     ao=str2num(get(handles.inite3,'String'));   %get angle from entered intiial conditions
 
-    handles.generation = [1, 1];
+    handles.generation = [1, 1, 1];
     handles.initcond{1}=[xo,yo,ao]; %save initial conditions for later use
 
 % TODO: else if for t and incident
@@ -880,7 +880,7 @@ else    %initial conditions are entered with t and incident angle
         
         n_ts = str2num(get(handles.inite1,'String')); % this will become user input
         n_iangles = str2num(get(handles.inite2,'String')); % this will become user input
-        handles.generation = [n_ts, n_iangles];
+        handles.generation = [n_ts, n_iangles, n_ts * n_iangles];
 
         % TODO: 3d array for f(T^k(t_ij, a_ij)) stuff
 
@@ -946,7 +946,7 @@ else    %initial conditions are entered with t and incident angle
             ao=ao-2*pi;
         end
 
-        handles.generation = [1, 1];
+        handles.generation = [1, 1, 1];
         handles.initcond{1}=[xo,yo,ao, to, iangle]; %save initial conditions for later use
     end
 end
@@ -1021,7 +1021,7 @@ for initcondi = handles.initcond
         y=eval(char(table{m,2}));   %symbolic function for y(t)
         deriv(m,1)=atan(diff(y,t)/diff(x,t));
     end
-    data=zeros(nmax,4); %allocate space for all data
+    data=NaN(nmax,4); %allocate space for all data
     n=1;    %n is current iteration being calculated
     iterate %calculates the 1st iteration based upon the initial conditions
 
@@ -1054,10 +1054,13 @@ for initcondi = handles.initcond
         catch   %if error in iterate then run the following:
             'iterate error' %error message
             handles.done=1;   %prevents further calculations due to error
+            handles.generation(3) = handles.generation(3) - 1; % subtract one valid trajectory away
+            data = NaN(nmax, 4); % throw out the whole trajectory
         end
     end
 
-    data=data(1:n,:);   %delete the rows of data that were not calculated
+    %data=data(1:n,:);   %delete the rows of data that were not calculated
+    %instead of deleting data, just leave it as NaN to be ignored in the integrals
     handles.data{end+1}=data;   %add data that was just calculated to new cell array element at end of handles.data
     guidata(gcbo,handles);
 
@@ -1070,6 +1073,7 @@ end
 if get(handles.radiobutton9, 'Value')==1
     n_ts = handles.generation(1);
     n_iangles = handles.generation(2);
+    n_traj = handles.generation(3);
     w = handles.table_params(1);
     r = handles.table_params(2);
     rho = handles.table_params(3);
@@ -1080,15 +1084,15 @@ if get(handles.radiobutton9, 'Value')==1
     % graph variance first
     figure
     plot([0:(nmax - 1)], var)
-    title(sprintf('Variance for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
+    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], terms)
-    title(sprintf('Variance terms for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
+    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], log(terms))
-    title(sprintf('ln(Variance terms) for %d x %d grid, w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, w, r, rho, delta))
+    title(sprintf('ln(Variance terms) for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 
 set(handles.stop,'Visible','off')
