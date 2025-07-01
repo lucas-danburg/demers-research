@@ -1084,15 +1084,15 @@ if get(handles.radiobutton9, 'Value')==1
     % graph variance first
     figure
     plot([0:(nmax - 1)], var)
-    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], terms)
-    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], log(terms))
-    title(sprintf('ln(Variance terms) for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %d', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('ln(Variance terms) for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 
 set(handles.stop,'Visible','off')
