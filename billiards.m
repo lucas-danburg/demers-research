@@ -877,6 +877,12 @@ else    %initial conditions are entered with t and incident angle
     if get(handles.radiobutton9, 'Value')==1
         % phase space bounds
         %axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])
+
+        % TODO: picking up from previously saved iteration data in a .mat file
+        % load the file (variables appear!)
+        % get the last x, y, a0 from the data!
+        % make that the new initial conditions!
+        % then at the end, concat the data B)
         
         n_ts = str2num(get(handles.inite1,'String')); % this will become user input
         n_iangles = str2num(get(handles.inite2,'String')); % this will become user input
@@ -1079,6 +1085,9 @@ if get(handles.radiobutton9, 'Value')==1
     rho = handles.table_params(3);
     delta = handles.table_params(4);
 
+    tau = w/2 - (delta*rho + (1 - delta) * pi * rho/4); % the distance between the side of the table and the squircle
+    l1 = 2 * tau * delta / rho + 1 + sqrt(4 * tau^2 * delta^2 / rho^2 + 4 * tau * delta / rho); % lambda_1, first eigenvalue
+
     [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
 
     % graph variance first
@@ -1091,8 +1100,8 @@ if get(handles.radiobutton9, 'Value')==1
     title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
-    plot([0:(nmax - 1)], log(terms))
-    title(sprintf('ln(Variance terms) for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    plot(log(l1) * [0:(nmax - 1)], -log(terms))
+    title(sprintf('ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 
 set(handles.stop,'Visible','off')
