@@ -1,0 +1,8 @@
+function value = f(x)
+    value = histogram(x)
+end
+
+
+x(t, table)
+y(t, table)
+f(x) = sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - tau_bar; % construct normalized f
