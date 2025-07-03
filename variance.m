@@ -108,16 +108,20 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
         fi_vals = f(Ti, Ti1);
         fi_vals(isnan(fi_vals)) = 0; % set NaN tau values to zero to resolve missing data
-        second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation);
+        second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation, table);
         sigma2s(i) = sum(second_terms(1:i));
     end
 
     % finally, add the first integral to each element
-    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params, generation);
+    sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params, generation, table);
 end
 
+% TODO: get these functions out of here and into their own files
+% TODO: fix piece AGAIN
+% TODO: re-run graphs
+
 % HELPER FUNCTIONS:
-function int_Xdm = E(Iangles_0, f_vals, table_params, generation)
+function int_Xdm = E(Iangles_0, f_vals, table_params, generation, table)
     % function to take the integral over phase space X (t, phi) of some function values
     % f_vals times delta-m (with respect to the measure m)
 
@@ -126,14 +130,14 @@ function int_Xdm = E(Iangles_0, f_vals, table_params, generation)
     rho = table_params(3);
     delta = table_params(4);
 
-    t_len = dQ(w, delta, r, rho); % and iangle-len = pi
+    t_len = table{end, 4} - table{1, 3};
     % we can find dpdt without knowing dp or dt themselves
     % dt = t_len / n_ts
     % dp = pi / n_iangles
     % dpdt = t_len * pi / n_trajectories
     dpdt = t_len * pi / generation(3);
 
-    int_Xdm = sum(sum(f_vals .* (1 / (2 * t_len) .* cos(Iangles_0)) .* dpdt)); % sum (integral) of f(t, phi)*dm
+    int_Xdm = sum(sum(f_vals .* (1 / (2 * dQ(w, delta, r, rho)) .* cos(Iangles_0)) .* dpdt)); % sum (integral) of f(t, phi)*dm
 end
 
 function density = D(T, table)
@@ -152,7 +156,7 @@ function density = D(T, table)
     for i = 1:n
         for j = 1:m
             tval = T(i, j);
-            p = piece(tval);
+            p = piece(tval, table);
             density(i, j) = sqrt(x{p}(tval)^2 + y{p}(tval)^2);
         end
     end
@@ -186,7 +190,7 @@ function xs = x(ts, table)
     for ii = 1:n
         for jj = 1:m
             t = ts(ii, jj);
-            xf = table{piece(t), 1};
+            xf = table{piece(t, table), 1};
             xs(ii, jj) = xf(t);
         end
     end
@@ -200,7 +204,7 @@ function ys = y(ts, table)
     for ii = 1:n
         for jj = 1:m
             t = ts(ii, jj);
-            yf = table{piece(t), 2};
+            yf = table{piece(t, table), 2};
             ys(ii, jj) = yf(t);
         end
     end

@@ -31,7 +31,7 @@ end
 %table (particle is in interior/exterior of table)
 upper=zeros(size(tt));
 for k=1:length(tt)
-    p=piece(tt(k));
+    p=piece(tt(k), handles.table);
     upper(k)=subs(d(p),tt(k));
     if subs(diff(table(p,1),t),tt(k))<0  %fix angle in case atan gives wrong quadrant
         if upper(k)>0
@@ -52,7 +52,7 @@ end
 
 y=zeros(length(tt),size(points,1));
 for k=1:length(tt)
-    p=piece(tt(k));
+    p=piece(tt(k), handles.table);
     for j=1:size(points,1)
         y(k,j)=atan2(subs(partition1(p,j),tt(k)),subs(partition2(p,j),tt(k)));
 %         y(k)=mod(atan2(subs(partition1(p,j),tt(k)),subs(partition2(p,j),tt(k)))-subs(d(p),tt(k))+pi/2,pi);
@@ -94,7 +94,7 @@ end
 for j=1:size(points,1)
     y=[];
     for k=1:length(tt)
-        p=piece(tt(k));
+        p=piece(tt(k), handles.table);
         y(k)=atan2(subs(partition1(p,j),tt(k)),subs(partition2(p,j),tt(k)));
 %         y(k)=mod(atan2(subs(partition1(p,j),tt(k)),subs(partition2(p,j),tt(k)))-subs(d(p),tt(k))+pi/2,pi);
 %         if y(k)>pi/2
