@@ -109,5 +109,33 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     % finally, add the first integral to each element
     sigma2s = 2 .* sigma2s + E(Iangles_0, f0_vals.^2 .* Dens, table_params, generation, table);
+
+    n_ts = generation(1);
+    n_iangles = generation(2);
+    n_traj = generation(3);
+    w = table_params(1);
+    r = table_params(2);
+    rho = table_params(3);
+    delta = table_params(4);
+
+    ttau = w/2 - (delta*rho + (1 - delta) * pi * rho/4); % the distance between the side of the table and the squircle
+    l1 = 2 * ttau * delta / rho + 1 + sqrt(4 * ttau^2 * delta^2 / rho^2 + 4 * ttau * delta / rho); % lambda_1, first eigenvalue
+
+    var = sigma2s;
+    terms = second_terms;
+    nmax = n_iter;
+
+    % graph variance first
+    figure
+    plot([0:(nmax - 1)], var)
+    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+
+    figure
+    plot([0:(nmax - 1)], terms)
+    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+
+    figure
+    plot(log(l1) * [0:(nmax - 1)], -log(terms))
+    title(sprintf('ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 % TODO: re-run graphs

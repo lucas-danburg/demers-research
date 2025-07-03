@@ -1077,31 +1077,7 @@ end
 % if there were multiple initial conditions, automatically calculate and graph
 % the variance and each term in the sum in the variance
 if get(handles.radiobutton9, 'Value')==1
-    n_ts = handles.generation(1);
-    n_iangles = handles.generation(2);
-    n_traj = handles.generation(3);
-    w = handles.table_params(1);
-    r = handles.table_params(2);
-    rho = handles.table_params(3);
-    delta = handles.table_params(4);
-
-    tau = w/2 - (delta*rho + (1 - delta) * pi * rho/4); % the distance between the side of the table and the squircle
-    l1 = 2 * tau * delta / rho + 1 + sqrt(4 * tau^2 * delta^2 / rho^2 + 4 * tau * delta / rho); % lambda_1, first eigenvalue
-
     [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
-
-    % graph variance first
-    figure
-    plot([0:(nmax - 1)], var)
-    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
-
-    figure
-    plot([0:(nmax - 1)], terms)
-    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
-
-    figure
-    plot(log(l1) * [0:(nmax - 1)], -log(terms))
-    title(sprintf('ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 
 set(handles.stop,'Visible','off')
