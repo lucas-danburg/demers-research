@@ -1,0 +1,9 @@
+function result = getFC()
+    data = evalin('base', 'data');
+    result = zeros(size(data{1}, 1), numel(data));
+    
+    for i = 1:numel(data)
+        result(:,i) = data{i}(:,3); %1 2 3 4 are t, horizontal incident, incident angle, piece hit
+    end
+    histogram(result(:), 1000);
+end
