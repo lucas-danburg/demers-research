@@ -84,17 +84,12 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     % this can then be handled nicely with 2d integrals of f
 
     % create f = the euclidian distance between collisions
-    w = table_params(1);
-    r = table_params(2);
-    rho = table_params(3);
-    delta = table_params(4);
-    tau_bar = pi * Q(w, delta, r, rho) / dQ(w, delta, r, rho);
-    f = @(ts_i, ts_f) sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - tau_bar; % construct normalized f
+    f = tau(table_params, table);
 
     sigma2s = zeros(1, n_iter); % calculate sigma2 for each iteration
     second_terms= zeros(1, n_iter); % also keep track of each term in the sum
     T1 = matdat_t{1};
-    Dens = D(T1, table);
+    Dens = Density(T1, table);
     f0_vals = f(matdat_t{1}, matdat_t{2});
     f0_vals(isnan(f0_vals)) = 0; % set NaN tau values to zero to resolve missing data
     % for each iteration
