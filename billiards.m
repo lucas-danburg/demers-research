@@ -1908,29 +1908,35 @@ end
 
 % --------------------------------------------------------------------
 function initphase_Callback(hObject, eventdata, handles)
-%Select initial conditions from phase space
-color='rkbgymcrkbgymcrkbgymcrkbgymc'; %order of colors used for drawing previous data points
-if handles.tables   %if a saved table is present
-    handles.table=[handles.stable;handles.table];   %combined saved and new table
+% if the variance radio button is selected, prompt the user to load from a .mat file
+if get(handles.radiobutton9, 'Value') == 1
+    [matfile, dir] = uigetfile;
+    load([dir, matfile]);
+else
+    %Select initial conditions from phase space
+    color='rkbgymcrkbgymcrkbgymcrkbgymc'; %order of colors used for drawing previous data points
+    if handles.tables   %if a saved table is present
+        handles.table=[handles.stable;handles.table];   %combined saved and new table
+    end
+    table=handles.table;
+    syms t; %make t a symbolic variable
+    figure  %open a new window
+    for k=1:size(handles.data,2)
+        plot(handles.data{k}(:,1),handles.data{k}(:,3),['.',color(k)])  %plot all of the calculated data in phase space (using a different color for each set of initial conditions)
+        hold on
+    end
+    % here are the phase space bounds
+    axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])    %set axis for phase space
+    for n=1:size(handles.table,1)-1
+        line([handles.table{n,4},handles.table{n,4}],[-pi/2,pi/2])  %draw vertical lines to divide up phase space into pieces
+    end
+    xlabel('t')
+    ylabel('incident angle')
+    title('Phase Space:  t vs incident angle')
+    initc=ginput(1);    %allow the user to use cross-hairs to select a point on the graph
+    set(handles.inite1,'String',num2str(initc(1)))  %enter t coordinate into edit fields
+    set(handles.inite3,'String',num2str(initc(2)))  %enter angle into edit fields
 end
-table=handles.table;
-syms t; %make t a symbolic variable
-figure  %open a new window
-for k=1:size(handles.data,2)
-    plot(handles.data{k}(:,1),handles.data{k}(:,3),['.',color(k)])  %plot all of the calculated data in phase space (using a different color for each set of initial conditions)
-    hold on
-end
-% here are the phase space bounds
-axis([handles.table{1,3},handles.table{size(handles.table,1),4},-pi/2,pi/2])    %set axis for phase space
-for n=1:size(handles.table,1)-1
-    line([handles.table{n,4},handles.table{n,4}],[-pi/2,pi/2])  %draw vertical lines to divide up phase space into pieces
-end
-xlabel('t')
-ylabel('incident angle')
-title('Phase Space:  t vs incident angle')
-initc=ginput(1);    %allow the user to use cross-hairs to select a point on the graph
-set(handles.inite1,'String',num2str(initc(1)))  %enter t coordinate into edit fields
-set(handles.inite3,'String',num2str(initc(2)))  %enter angle into edit fields
 % --------------------------------------------------------------------
 function initradio1_Callback(hObject, eventdata, handles)
 set(handles.initradio1,'Value',1)
@@ -1963,6 +1969,7 @@ set(handles.initl1,'String','t')
 set(handles.initl3,'String','Incident Angle')
 set(handles.initl3,'String','Incident Angle')
 set(handles.initphase,'Visible','on')
+set(handles.initphase, 'String', 'Select from phase space')
 
 % --- Executes on mouse press over axes background.
 function preview_ButtonDownFcn(hObject, eventdata, handles)
@@ -2008,7 +2015,9 @@ set(handles.initl1, 'String', '# of t-values')
 set(handles.initl2,'Visible','on')
 set(handles.initl2, 'String', '# of phi-values')
 set(handles.initl3,'Visible','off')
-set(handles.initphase,'Visible','off')
+set(handles.initphase,'Visible','on')
+set(handles.initphase,'Enable','on')
+set(handles.initphase, 'String', 'Load from previous run')
 % hObject    handle to radiobutton9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
