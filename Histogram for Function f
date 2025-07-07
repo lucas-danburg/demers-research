@@ -14,9 +14,6 @@ function f(filename, delta)
     
     tauBar = numerator/denominator;
     
-    disp(data{111}(15,:))
-    disp(data{111}(16,:))
-    
     nan_count = 0;
     array = [];
     for i = 1: numel(data) - 1
@@ -32,12 +29,9 @@ function f(filename, delta)
                 nan_count = nan_count+1;
             end
         end
-        disp(total);
         average = total/10;
         array = [array, average];
     end
     
     histogram(array)
 end
-
-    
