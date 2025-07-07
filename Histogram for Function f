@@ -1,16 +1,16 @@
-function f(filename, delta)
+function f(filename, w, r, rho, delta)
     % Let w=5,R=2,rho=1
     file = load(filename);
-    delta = 0.3;
+    
     
     data = file.data;
     
-    side_squircle = integral(@(s)sqrt(delta^2+2*delta*cos(s)*(1-delta)+(1-delta)^2), -pi/4, pi/4);
-    denominator = 4*pi + 4 + 4*side_squircle;
+    side_squircle = integral(@(s)sqrt(delta^2 + 2*delta*cos(s/rho)*(1-delta) + (1-delta)^2), -rho*pi/4, rho*pi/4);
+    denominator = 2*pi*r + 4*(w - 2*r + side_squircle);
     
-    partONE = -0.5*(delta*(sqrt(2)/2) + (1-delta)*(pi/4))^2;
-    partTWO = (delta^2/2)*(pi/4+1/2)+delta*(1-delta)*(1+pi/4)*(sqrt(2)/2)+(1-delta)^2*(pi^2/16);
-    numerator = pi*(25-4*pi-8*(partONE+partTWO));
+    partONE = 0.5*rho^2 * (delta*sqrt(2)/2 + (1-delta)*(pi/4))^2;
+    partTWO = rho^2*((delta^2/2)*(pi/4 + 0.5) + delta*(1 - delta)*(1 + pi/4)*(sqrt(2)/2) + ((1 - delta)*pi/4)^2);
+    numerator = pi*(w^2 - pi*r^2 - 8*(partTWO - partONE));
     
     tauBar = numerator/denominator;
     
@@ -24,9 +24,9 @@ function f(filename, delta)
             horizontal_next = data{i}(j+1,2);
             incident_next = data{i}(j+1,3);
             if ~isnan(horizontal) && ~isnan(incident) && ~isnan(horizontal_next) && ~isnan(incident_next)
-                total = total + sqrt((horizontal(1)-horizontal_next(1))^2+(incident(1)-incident_next(1))^2) - tauBar;
+                total = total + sqrt((horizontal(1) - horizontal_next(1))^2 + (incident(1) - incident_next(1))^2) - tauBar;
             else
-                nan_count = nan_count+1;
+                nan_count = nan_count + 1;
             end
         end
         average = total/10;
@@ -34,4 +34,27 @@ function f(filename, delta)
     end
     
     histogram(array)
+
+
 end
+
+
+%function value = f(x)
+ %   value = histogram(x);
+%end
+
+
+
+%f(x) = sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - tau_bar; % construct normalized f
+%table_params = [w, r, rho, delta]
+%f = tau(table_params, table);
+
+%f(t1, t2)
+
+    
+    %result = zeros(size(data{1}, 1), numel(data));
+    
+   % for i = 1:numel(data)
+     %   result(:,i) = data{i}(:,4); %1 2 3 4 are t, horizontal incident, incident angle, piece hit
+   % end
+   % histogram(result(:), 12);
