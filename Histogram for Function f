@@ -8,9 +8,9 @@ function f(filename, w, r, rho, delta)
     side_squircle = integral(@(s)sqrt(delta^2 + 2*delta*cos(s/rho)*(1-delta) + (1-delta)^2), -rho*pi/4, rho*pi/4);
     denominator = 2*pi*r + 4*(w - 2*r + side_squircle);
     
-    partONE = 0.5*rho^2 * (delta*sqrt(2)/2 + (1-delta)*(pi/4))^2;
-    partTWO = rho^2*((delta^2/2)*(pi/4 + 0.5) + delta*(1 - delta)*(1 + pi/4)*(sqrt(2)/2) + ((1 - delta)*pi/4)^2);
-    numerator = pi*(w^2 - pi*r^2 - 8*(partTWO - partONE));
+    partONE = delta*sqrt(2)/2 + (1-delta)*(pi/4);
+    partTWO = (delta^2/2)*(pi/4 + 0.5) + delta*(1 - delta)*(1 + pi/4)*(sqrt(2)/2) + ((1 - delta)*pi/4)^2;
+    numerator = pi*(w^2 - pi*r^2 - 4*rho^2*(2*partTWO - partONE^2));
     
     tauBar = numerator/denominator;
     
