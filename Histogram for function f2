@@ -1,0 +1,171 @@
+function output = f(filename, delta)
+    % Let w=5,R=2,rho=1
+    w = 5;
+    r = 2;
+    rho = 1;
+    % Parameters
+    L = w - 2*r;      % length of straight segment
+    A = pi/2*r;       % length of arc (quarter circle)
+    to = 0;           % starting parameter for first arc
+
+    file = load(char(filename));
+    data = file.data;
+
+    side_squircle = integral(@(s)sqrt(delta^2 + 2*delta*cos(s/rho)*(1-delta) + (1-delta)^2), -rho*pi/4, rho*pi/4);
+    denominator = 2*pi*r + 4*(w - 2*r + side_squircle);
+    
+    partONE = delta*sqrt(2)/2 + (1-delta)*(pi/4);
+    partTWO = (delta^2/2)*(pi/4 + 0.5) + delta*(1 - delta)*(1 + pi/4)*(sqrt(2)/2) + ((1 - delta)*pi/4)^2;
+    numerator = pi*(w^2 - pi*r^2 - 4*rho^2*(2*partTWO - partONE^2));
+    
+    tauBar = numerator/denominator;
+    
+    array = [];
+    for i = 1: numel(data) - 1
+        total = 0;
+        for j = 1:99
+            t = data{i}(j,1);
+            piece = data{i}(j,4);
+            t_next = data{i}(j+1,1);
+            piece_next = data{i}(j+1,4);
+            if ~isnan(t) && ~isnan(piece) && ~isnan(t_next) && ~isnan(piece_next)
+                x = getXvalue(piece, t, w, r, rho, to, delta, A, L);
+                y = getYvalue(piece, t, w, r, rho, to, delta, A, L);
+                x_next = getXvalue(piece_next, t_next, w, r, rho, to, delta, A, L);
+                y_next = getYvalue(piece_next, t_next, w, r, rho, to, delta, A, L);
+                total = total + sqrt((x_next(1)-x(1))^2+(y_next(1)-y(1))^2) - tauBar;
+            end
+        end
+        average = total/10;
+        array = [array, average];
+        disp(i);
+    end
+    figure;
+    histogram(array)
+    title(sprintf('Delta = %.2f', delta));
+    disp(delta);
+end
+
+
+
+function x = getXvalue(piece, t, w, r, rho, to, delta, A, L)
+    table_1_1 = @(t) ((w/2) + r *cos(pi/2 + (t-to))/r);  % X(t)
+    table_1_4 = to + A;
+    table_2_1 = @(t) (-t+ (L/2 + table_1_4));
+    table_2_3 = table_1_4;
+    table_2_4 = table_2_3 + L;
+    table_3_1 = @(t) ((-w/2) + r *cos(0 + (t- table_2_4))/r);
+    table_3_3 = table_2_4;
+    table_3_4 = table_3_3 + A;
+    table_4_1 = @(t) ((-w/2) * t);
+    table_4_3 = table_3_4;
+    table_4_4 = table_4_3 + L;
+    table_5_1 = @(t) (-w/2 + r * cos(3*pi/2 + (t - table_4_4)/r));
+    table_5_3 = table_4_4;
+    table_5_4 = table_5_3 + A;
+    table_6_1 = @(t) (t + (-L/2 - table_5_4));
+    table_6_3 = table_5_4;
+    table_6_4 = table_6_3 + L;
+    table_7_1 = @(t) (w/2 + r * cos(pi + (t - table_6_4)/r));
+    table_7_3 = table_6_4;
+    table_7_4 = table_7_3 + A;
+    table_8_1 = @(t) w/2;
+    table_8_3 = table_7_4;
+    table_8_4 = table_8_3 + L;
+    table_9_1 = @(t) (delta * rho * cos((t - (pi*rho/4) - table_8_4)/rho) + (1 - delta) * (pi*rho/4));
+    table_9_3 = table_8_4;
+    table_9_4 = table_9_3 + pi*rho/2;
+    table_10_1 = @(t) (delta * rho * cos((t + (pi*rho/4) - table_9_4)/rho) + (1 - delta) * (-t + (pi*rho/4) + table_9_4));
+    table_10_3 = table_9_4;
+    table_10_4 = table_10_3 + pi*rho/2;
+    table_11_1 = @(t) (delta * rho * cos((t + (3*pi*rho/4) - table_10_4)/rho) + (1 - delta) * (-pi*rho/4));
+    table_11_3 = table_10_4;
+    table_11_4 = table_11_3 + pi*rho/2;
+    table_12_1 = @(t) (delta * rho * cos((t + (5*pi*rho/4) - table_11_4)/rho) + (1 - delta) * (t - (pi*rho/4) - table_11_4));
+    if piece == 1
+        x = table_1_1(t);
+    elseif piece == 2
+        x = table_2_1(t);
+    elseif piece == 3
+        x = table_3_1(t);
+    elseif piece == 4
+        x = table_4_1(t);
+    elseif piece == 5
+        x = table_5_1(t);
+    elseif piece == 6
+        x = table_6_1(t);
+    elseif piece == 7
+        x = table_7_1(t);
+    elseif piece == 8
+        x = table_8_1(t);
+    elseif piece == 9
+        x = table_9_1(t);
+    elseif piece == 10
+        x = table_10_1(t);
+    elseif piece == 11
+        x = table_11_1(t);
+    elseif piece == 12
+        x = table_12_1(t);
+    end
+end
+
+function y = getYvalue(piece, t, w, r, rho, to, delta, A, L)
+    table_1_2 = @(t) (num2str(-w/2) + r *sin(pi/2 + (t-to))/r); % Y(t)
+    table_1_4 = to + A;
+    table_2_2 = @(t) ((-w/2)*t);
+    table_2_3 = table_1_4;
+    table_2_4 = table_2_3 + L;
+    table_3_2 = @(t) ((-w/2) + r*sin(0 + (t-table_2_4))/r);
+    table_3_3 = table_2_4;
+    table_3_4 = table_3_3 + A;
+    table_4_2 = @(t) (t+(-L/2 - table_3_4));
+    table_4_3 = table_3_4;
+    table_4_4 = table_4_3 + L;
+    table_5_2 = @(t)  (w/2 + r * sin(3*pi/2 + (t - table_4_4)/r));
+    table_5_3 = table_4_4;
+    table_5_4 = table_5_3 + A;
+    table_6_2 = @(t) w/2;
+    table_6_3 = table_5_4;
+    table_6_4 = table_6_3 + L;
+    table_7_2 = @(t) (w/2 + r * sin(pi + (t - table_6_4)/r));
+    table_7_3 = table_6_4;
+    table_7_4 = table_7_3 + A;
+    table_8_2 = @(t) (-t + (table_7_4 + L/2));
+    table_8_3 = table_7_4;
+    table_8_4 = table_8_3 + L;
+    table_9_2 = @(t) (delta * rho * sin((t - (pi*rho/4) - table_8_4)/rho) + (1 - delta) * (t - (pi*rho/4) - table_8_4));
+    table_9_3 = table_8_4;
+    table_9_4 = table_9_3 + pi*rho/2;
+    table_10_2 = @(t) (delta * rho * sin((t + (pi*rho/4) - table_9_4)/rho) + (1 - delta) * (pi*rho/4));
+    table_10_3 = table_9_4;
+    table_10_4 = table_10_3 + pi*rho/2;
+    table_11_2 = @(t) (delta * rho * sin((t + (3*pi*rho/4) - table_10_4)/rho) + (1 - delta) * (-t + (pi*rho/4) + table_10_4));
+    table_11_3 = table_10_4;
+    table_11_4 = table_11_3 + pi*rho/2;
+    table_12_2 = @(t) (delta * rho * sin((t + (5*pi*rho/4) - table_11_4)/rho) + (1 - delta) * (-pi*rho/4));
+    if piece == 1
+        y = table_1_2(t);
+    elseif piece == 2
+        y = table_2_2(t);
+    elseif piece == 3
+        y = table_3_2(t);
+    elseif piece == 4
+        y = table_4_2(t);
+    elseif piece == 5
+        y = table_5_2(t);
+    elseif piece == 6
+        y = table_6_2(t);
+    elseif piece == 7
+        y = table_7_2(t);
+    elseif piece == 8
+        y = table_8_2(t);
+    elseif piece == 9
+        y = table_9_2(t);
+    elseif piece == 10
+        y = table_10_2(t);
+    elseif piece == 11
+        y = table_11_2(t);
+    elseif piece == 12
+        y = table_12_2(t);
+    end
+end
