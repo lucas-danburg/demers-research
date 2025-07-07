@@ -1437,7 +1437,9 @@ switch get(handles.databox,'Value') %choose which type of raw data to export bas
 case 1  %Type of data:  Raw Data (t, horizontal, incident, piece)
     if get(handles.radio1,'Value')==1   %save data
         initcond=handles.initcond;
-        save(uiputfile,'data','table','initcond')   %save prompt
+        generation = handles.generation;
+        table_params = handles.table_params;
+        save(uiputfile,'data','table','initcond', 'generation', 'table_params')   %save prompt
     end
     if get(handles.radio2,'Value')==1   %export data to command window
         if size(data,2)==1  %if single initial conditions just display data
