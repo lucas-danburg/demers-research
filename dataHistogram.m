@@ -1,11 +1,4 @@
-function output = f()
-    [filename, folder] = uigetfile('*.mat')
-    file = load([folder, filename]);
-    data = file.data;
-
-    delta_str = regexp(filename, '[\d.]+', 'match')
-    delta = str2double(delta_str{1})
-
+function output = f(filename, delta)
     % Let w=5,R=2,rho=1
     w = 5;
     r = 2;
@@ -72,39 +65,67 @@ function output = f()
         table{12,2} = inline([num2str(delta*rho),'*sin((t+(5*pi*',num2str(rho),'/4)-',num2str(table{11,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-pi*',num2str(rho),'/4)'], 't');
         table{12,3} = table{11,4};
         table{12,4} = table{12,3} + pi*rho/2;
-        
 
-    side_squircle = integral(@(s)sqrt(delta^2 + 2*delta*cos(s/rho)*(1-delta) + (1-delta)^2), -rho*pi/4, rho*pi/4);
-    denominator = 2*pi*r + 4*(w - 2*r + side_squircle);
+    file = load(filename);
+    data = file.data;
+
+    x = data{1};
+    disp(x);
+    y = data{1}(1,:);
+    z = data{1}(1,1);
+    disp(z);
+    j = data{1}(1,4);
+    disp(j);
+    disp(y);
+
+    partTWO = (delta^2*rho/2)*((pi*rho/4)+(rho/2))+delta*(1-delta)*rho^2*(1+pi/4)*(sqrt(2)/2)+(1-delta)^2*(pi^2*rho^2/16);
+    partTHREE = -0.5*(delta*rho*(sqrt(2)/2) + (1-delta)*(pi*rho/4))^2;
+    squircle = 8*(partTWO + partTHREE);
+    area = (w^2)-(pi*r^2)-squircle;
     
-    partONE = delta*sqrt(2)/2 + (1-delta)*(pi/4);
-    partTWO = (delta^2/2)*(pi/4 + 0.5) + delta*(1 - delta)*(1 + pi/4)*(sqrt(2)/2) + ((1 - delta)*pi/4)^2;
-    numerator = pi*(w^2 - pi*r^2 - 4*rho^2*(2*partTWO - partONE^2));
+    side_squircle = integral(@(s)sqrt(delta^2+(2*delta*cos(s/rho)*(1-delta))+(1-delta)^2), -pi*rho/4, pi*rho/4);
+    length = 4*(pi*r/2) + 4*(w-2*r)+4*(side_squircle);
     
-    tauBar = numerator/denominator;
-    
+    tauBar = pi*area/length;
+
     array = [];
-    for i = 1: numel(data) - 1
+    filteredArray = [];
+    for i = 1: numel(data)
         total = 0;
         for j = 1:99
             t = data{i}(j,1);
             piece = data{i}(j,4);
             t_next = data{i}(j+1,1);
             piece_next = data{i}(j+1,4);
+            % disp(t)
+            % disp(piece)
+            % disp(t_next)
+            % disp(piece_next)
+            % disp(' ')
             if ~isnan(t) && ~isnan(piece) && ~isnan(t_next) && ~isnan(piece_next)
                 x = table{piece,1}(t);
                 y = table{piece,2}(t);
                 x_next = table{piece_next,1}(t_next);
                 y_next = table{piece_next,2}(t_next);
-                total = total + sqrt((x_next(1)-x(1))^2+(y_next(1)-y(1))^2) - tauBar;
+                % disp(x)
+                % disp(y)
+                % disp(x_next)
+                % disp(y_next)
+                % disp(" ")
+                total = total + sqrt((x_next-x)^2+(y_next-y)^2) - tauBar;
             end
         end
-        average = total/10;
+        average = total/sqrt(99);
         array = [array, average];
-        %disp(i);
+        if average >= -4 && average <= 4
+            filteredArray = [filteredArray, average];
+        end
+        disp(average);
     end
     figure;
     histogram(array)
     title(sprintf('Delta = %.2f', delta));
     disp(delta);
+    figure;
+    histogram(filteredArray);
 end
