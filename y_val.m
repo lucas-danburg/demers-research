@@ -1,4 +1,4 @@
-function ys = y(ts, table)
+function ys = y_val(ts, table)
     %disp('y() called')
     % function to get a y value (or values) from a t value (or values)
     [n, m] = size(ts);

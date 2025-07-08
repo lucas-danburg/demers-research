@@ -1,4 +1,4 @@
-function xs = x(ts, table)
+function xs = x_val(ts, table)
     %disp('x() called')
     % function to get an x value (or values) from a t value (or values)
     [n, m] = size(ts);

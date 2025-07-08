@@ -6,5 +6,5 @@ function f = tau(table_params, table)
     rho = table_params(3);
     delta = table_params(4);
     tau_bar = pi * Q(w, delta, r, rho) / dQ(w, delta, r, rho);
-    f = @(ts_i, ts_f) sqrt((x(ts_f, table) - x(ts_i, table)).^2 + (y(ts_f, table) - y(ts_i, table)).^2) - tau_bar; % construct normalized f
+    f = @(ts_i, ts_f) sqrt((x_val(ts_f, table) - x_val(ts_i, table)).^2 + (y_val(ts_f, table) - y_val(ts_i, table)).^2) - tau_bar; % construct normalized f
 end
