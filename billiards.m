@@ -1016,9 +1016,9 @@ condit_n = 1;
 max_condits = size(handles.initcond, 2);
 for initcondi = handles.initcond
     initcondi = initcondi{1};
-    xo = initcondi(1);
-    yo = initcondi(2);
-    ao = initcondi(3);
+        xo = initcondi(1);
+        yo = initcondi(2);
+        ao = initcondi(3);
 
     %d is initl3 of tangent line for each piece (d is a vector of functions of t)
     deriv=sym(zeros(size(table,1),1));
@@ -1668,55 +1668,87 @@ set(handles.frame5,'Visible','off')
 set(handles.frame6,'Visible','off')
 set(handles.stop,'Visible','on')
 
+% yes... define global variables... make your code unreadable... never use function arguments...
 global table
 global t
 global nmax
-global xo
-global yo
-global ao
 syms t  %makes t a symbolic variable
 table=handles.table;
-data=handles.data{end}; %load data for last initial conditions
-n=size(data,1); %n is number of iterations already calculated (starts at last calculated iteration)
-nmax=n+str2num(get(handles.nmore,'String'))-1;  %maximum number of iterations
-data=[data;zeros(nmax-n,4)]; %allocate space for all data
-%d is initl3 of tangent line for each piece (d is a vector of functions of t)
-deriv=sym(zeros(size(table,1),1));
-for m=1:size(table,1)
-    x=eval(char(table{m,1}));   %symbolic function for x(t)
-    y=eval(char(table{m,2}));   %symbolic function for y(t)
-    deriv(m,1)=atan(diff(y,t)/diff(x,t));
+
+% for each initial condition
+condit_n = 1;
+max_condits = size(handles.initcond, 2);
+% lack of function scope should be punishable by death
+for pls_nouse = 1:numel(handles.data)
+    datai = handles.data{pls_nouse}; % get the existing data for that initial condition
+
+    % calculate new xo yo ao to start off again
+    xo = x_val(datai(1), handles.table);
+    yo = y_val(datai(1), handles.table);
+    ao = datai(2);
+
+    n=size(datai,1); %n is number of iterations already calculated (starts at last calculated iteration)
+    nmax=n+str2num(get(handles.nmore,'String'));  %maximum number of iterations
+    data=[datai;NaN(nmax-n,4)]; %allocate space for all data
+
+    %d is initl3 of tangent line for each piece (d is a vector of functions of t)
+    deriv=sym(zeros(size(table,1),1));
+    for m=1:size(table,1)
+        x=eval(char(table{m,1}));   %symbolic function for x(t)
+        y=eval(char(table{m,2}));   %symbolic function for y(t)
+        deriv(m,1)=atan(diff(y,t)/diff(x,t));
+    end
+
+    %all of the following code is identical to code in run
+    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])    %label for number of iterations completed
+    set(handles.stopl,'Visible','on')   %display cancel label
+    drawnow
+    handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
+    guidata(gcbo,handles);
+    global derivComp    %table of components needed for derivative of the billiard map
+    derivComp=zeros(nmax,4);
+    % for each initial condition
+    while n<nmax && ~handles.done && ~isnan(xo)  %while we have not completed enough iterations and still not done and the trajectory isnt already bust
+        derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
+        derivComp(n,2)=yo;
+        derivComp(n,3)=data(n,3);
+        derivComp(n,4)=data(n,4);
+        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
+        n=n+1;
+        drawnow %force Matlab to update the GUI display
+        handles=guidata(gcbo);
+        xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
+        yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
+        ao=data(n-1,2); %horizontal angle of last intersection
+        try
+            iterate %find the location and angle of the next collision
+        catch   %if error in iterate then run the following:
+            'iterate error' %error message
+            handles.done=1;   %prevents further calculations due to error
+            handles.generation(3) = handles.generation(3) - 1; % subtract one valid trajectory away
+            data = NaN(nmax, 4); % throw out the whole trajectory
+        end
+    end
+
+    %data=data(1:n,:);   %delete the rows of data that were not calculated
+    %instead of deleting data, just leave it as NaN to be ignored in the integrals
+    handles.data{pls_nouse} = data;
+    guidata(gcbo,handles);
+
+    condit_n = condit_n + 1;
+end
+% END FOR LOOP
+disp('done')
+size(handles.data)
+size(handles.data{1})
+handles.generation
+
+% if there were multiple initial conditions, automatically calculate and graph
+% the variance and each term in the sum in the variance
+if get(handles.radiobutton9, 'Value')==1
+    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params);
 end
 
-%all of the following code is identical to code in run
-set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])    %label for number of iterations completed
-set(handles.stopl,'Visible','on')   %display cancel label
-drawnow
-handles.done=0; %whether the calculations are done or not, changed by the cancel button to 1
-guidata(gcbo,handles);
-global derivComp    %table of components needed for derivative of the billiard map
-while n<=nmax && ~handles.done   %while we have not completed enough iterations and still not done
-    derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
-    derivComp(n,2)=yo;
-    derivComp(n,3)=data(n,3);
-    derivComp(n,4)=data(n,4);
-    set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed'])  %update display with number of iterations completed
-    n=n+1;
-    drawnow %force Matlab to update the GUI display
-    handles=guidata(gcbo);
-    xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
-    yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
-    ao=data(n-1,2); %horizontal angle of last intersection
-    try
-        iterate %find the location and angle of the next collision
-    catch   %if error in iterate then run the following:
-        'iterate error' %error message
-        n=nmax+1;   %prevents further calculations due to error
-    end    
-end
-data=data(1:n,:);   %delete the rows of data that were not calculated
-handles.data{end}=data;   %add data that was just calculated to new cell array element at end of handles.data
-guidata(gcbo,handles);
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
 set(handles.frame3,'Visible','on')
@@ -1911,9 +1943,39 @@ end
 % --------------------------------------------------------------------
 function initphase_Callback(hObject, eventdata, handles)
 % if the variance radio button is selected, prompt the user to load from a .mat file
+handles.loaded = false;
 if get(handles.radiobutton9, 'Value') == 1
-    [matfile, dir] = uigetfile;
-    load([dir, matfile]);
+    [matfile, dir] = uigetfile('*.mat'); % get file and folder
+    datt = load([dir, matfile]); % load file from that folder
+
+    handles.loaded = true;
+
+    handles.table = datt.table;
+    handles.data = datt.data;
+    handles.generation = datt.generation;
+    handles.initcond = datt.initcond;
+    handles.table_params = datt.table_params;
+    guidata(hObject, handles);
+
+    table = datt.table;
+    data = datt.data;
+    generation = datt.generation;
+    initcond = datt.initcond;
+    table_params = datt.table_params;
+
+    % fill in boxes with the previous values for user enjoyment
+    set(handles.param1e, 'String', num2str(table_params(1)))
+    set(handles.param2e, 'String', num2str(table_params(2)))
+    set(handles.param3e, 'String', num2str(table_params(3)))
+    set(handles.param4e, 'String', num2str(table_params(4)))
+
+    set(handles.inite1, 'String', num2str(generation(1)))
+    set(handles.inite2, 'String', num2str(generation(2)))
+
+    set(handles.run, 'Visible', 'off')
+    set(handles.nmax, 'Visible', 'off')
+    set(handles.more, 'Visible', 'on')
+    set(handles.nmore, 'Visible', 'on')
 else
     %Select initial conditions from phase space
     color='rkbgymcrkbgymcrkbgymcrkbgymc'; %order of colors used for drawing previous data points
