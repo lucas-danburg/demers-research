@@ -1,4 +1,11 @@
-function output = f(filename, delta)
+function output = f()
+    [filename, folder] = uigetfile('*.mat')
+    file = load([folder, filename]);
+    data = file.data;
+
+    delta_str = regexp(filename, '[\d.]+', 'match')
+    delta = str2double(delta_str{1})
+
     % Let w=5,R=2,rho=1
     w = 5;
     r = 2;
@@ -66,8 +73,6 @@ function output = f(filename, delta)
         table{12,3} = table{11,4};
         table{12,4} = table{12,3} + pi*rho/2;
         
-    file = load(char(filename));
-    data = file.data;
 
     side_squircle = integral(@(s)sqrt(delta^2 + 2*delta*cos(s/rho)*(1-delta) + (1-delta)^2), -rho*pi/4, rho*pi/4);
     denominator = 2*pi*r + 4*(w - 2*r + side_squircle);
@@ -96,7 +101,7 @@ function output = f(filename, delta)
         end
         average = total/10;
         array = [array, average];
-        disp(i);
+        %disp(i);
     end
     figure;
     histogram(array)
