@@ -1,11 +1,4 @@
-function output = f() %If you want to make w, r, rho variable,put them here like f(w, r, rho)
-    [filename, folder] = uigetfile('*.mat') %Opens all .mat files to pick the delta data you want
-    file = load([folder, filename]);
-    data = file.data;
-
-    delta_str = regexp(filename, '[\d.]+', 'match'); % Recognizes digits and dots (decimal numbers) in the delta data filename
-    delta = str2double(delta_str{1}) % delta = that number
-
+function output = f(filename, delta)
     % Let w=5,R=2,rho=1
     w = 5;
     r = 2;
@@ -73,15 +66,12 @@ function output = f() %If you want to make w, r, rho variable,put them here like
         table{12,3} = table{11,4};
         table{12,4} = table{12,3} + pi*rho/2;
 
-    x = data{1};
-    disp(x);
-    y = data{1}(1,:);
-    z = data{1}(1,1);
-    disp(z);
-    j = data{1}(1,4);
-    disp(j);
-    disp(y);
-
+    file = load(filename);
+    disp(filename);
+    data = file.data;
+    tbl = file.table;
+    initcond = file.initcond;
+    
     partTWO = (delta^2*rho/2)*((pi*rho/4)+(rho/2))+delta*(1-delta)*rho^2*(1+pi/4)*(sqrt(2)/2)+(1-delta)^2*(pi^2*rho^2/16);
     partTHREE = -0.5*(delta*rho*(sqrt(2)/2) + (1-delta)*(pi*rho/4))^2;
     squircle = 8*(partTWO + partTHREE);
@@ -91,45 +81,43 @@ function output = f() %If you want to make w, r, rho variable,put them here like
     length = 4*(pi*r/2) + 4*(w-2*r)+4*(side_squircle);
     
     tauBar = pi*area/length;
-
     array = [];
     filteredArray = [];
+    variance = [];
     for i = 1: numel(data)
         total = 0;
+        x_values = [];
+        y_values = [];
         for j = 1:99
             t = data{i}(j,1);
             piece = data{i}(j,4);
             t_next = data{i}(j+1,1);
             piece_next = data{i}(j+1,4);
-            % disp(t)
-            % disp(piece)
-            % disp(t_next)
-            % disp(piece_next)
-            % disp(' ')
             if ~isnan(t) && ~isnan(piece) && ~isnan(t_next) && ~isnan(piece_next)
                 x = table{piece,1}(t);
                 y = table{piece,2}(t);
                 x_next = table{piece_next,1}(t_next);
                 y_next = table{piece_next,2}(t_next);
-                % disp(x)
-                % disp(y)
-                % disp(x_next)
-                % disp(y_next)
-                % disp(" ")
                 total = total + sqrt((x_next-x)^2+(y_next-y)^2) - tauBar;
             end
         end
         average = total/sqrt(99);
         array = [array, average];
-        if average >= -4 && average <= 4
-            filteredArray = [filteredArray, average];
-        end
-        disp(average);
+        disp(i);
     end
+
+    generation = [sqrt(size(data)), sqrt(size(data)), size(data)];
+    table_params = [w, r, rho, delta];
+    [sigma2s, second_terms] = myVariance(initcond, generation, data, tbl, table_params);
+    sigma2 = sigma2s(end);  % or pick whichever index you want
+    disp(sigma2);
+
     figure;
     histogram(array)
+    hold on;
+    fplot(@(x)(1000 / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
+    fplot(@(x)(1000 / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     title(sprintf('Delta = %.2f', delta));
-    disp(delta);
-    figure;
-    histogram(filteredArray);
+    hold off;
+
 end
