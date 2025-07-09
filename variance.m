@@ -136,6 +136,6 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     figure
     plot(log(l1) * [0:(nmax - 1)], -log(abs(terms)))
-    title(sprintf('ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('-ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 % TODO: re-run graphs
