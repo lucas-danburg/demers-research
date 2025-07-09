@@ -106,7 +106,10 @@ function output = f(filename, delta)
         disp(i);
     end
 
-    generation = [sqrt(size(data)), sqrt(size(data)), size(data)];
+    
+    n = sqrt(size(data,2));
+    nxn = size(data,2);
+    generation = [n,n,nxn];
     table_params = [w, r, rho, delta];
     [sigma2s, second_terms] = myVariance(initcond, generation, data, tbl, table_params);
     sigma2 = sigma2s(end);  % or pick whichever index you want
