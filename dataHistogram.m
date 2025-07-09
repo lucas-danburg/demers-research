@@ -1,4 +1,11 @@
-function output = f(filename, delta)
+function output = f() %If you want to make w, r, rho variable,put them here like f(w, r, rho)
+    [filename, folder] = uigetfile('*.mat') %Opens all .mat files to pick the delta data you want
+    file = load([folder, filename]);
+    data = file.data;
+
+    delta_str = regexp(filename, '[\d.]+', 'match'); % Recognizes digits and dots (decimal numbers) in the delta data filename
+    delta = str2double(delta_str{1}) % delta = that number
+
     % Let w=5,R=2,rho=1
     w = 5;
     r = 2;
@@ -65,9 +72,6 @@ function output = f(filename, delta)
         table{12,2} = inline([num2str(delta*rho),'*sin((t+(5*pi*',num2str(rho),'/4)-',num2str(table{11,4}),')/',num2str(rho),')+(1-',num2str(delta),')*(-pi*',num2str(rho),'/4)'], 't');
         table{12,3} = table{11,4};
         table{12,4} = table{12,3} + pi*rho/2;
-
-    file = load(filename);
-    data = file.data;
 
     x = data{1};
     disp(x);
