@@ -1,9 +1,13 @@
-function [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params)
+function [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator)
     % data is the handles.data object
     % initcond is the handles.initcond object
     % generation is the handles.generation object
     % table is handles.table, needed to find the length of the boundary
     % table_params is the handles.table_params object
+    % f_generator is a function that takes in table_params and table and outputs
+    % another function that will be the observable. the outputted function is a function of
+    % (current phi vals, current t vals, next phi vals, next t vals). the two currently implimented
+    % f_generator options are `tau` and `phi_ones`
 
     datamat = cat(3, data{:}); % convert the cell array to a 3d normal array
     % this array now has shape (# of iterations, 4, # of initial conditions)
@@ -44,6 +48,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     matdat = cell(n_iter + 1, n_ts, n_iangles); % initialize a cell array of appropriate shape
     matdat_t = cell(n_iter + 1); % make another one holding actual matrices of t values only
+    matdat_phi = cell(n_iter + 1); % make another one holding actual matrices of phi values only
     % also get a matrix of phi values of all the initial conditions, this is needed for the integrals
     Iangles_0 = [];
     for i = 1:(n_iter + 1) % for each iteration + 1
@@ -75,33 +80,37 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
         % what UniformOutput or false do
         M = arrayfun(@(t, phi) [t, phi], Ts_i, Iangles_i, 'UniformOutput', false);
         Mt = cell2mat(arrayfun(@(t, phi) t, Ts_i, Iangles_i, 'UniformOutput', false));
+        Mp = cell2mat(arrayfun(@(t, phi) phi, Ts_i, Iangles_i, 'UniformOutput', false));
         matdat{i} = M;
         matdat_t{i} = Mt;
+        matdat_phi{i} = Mp;
     end
     % this good because now we can use this to construct a new cell array with
     % length = # of iterations where each cell is a n_ts x n_iangles matrix
     % and each element of the matrix is the value of an observable f(t, phi).
     % this can then be handled nicely with 2d integrals of f
 
-    % create f = the euclidian distance between collisions
-    f = tau(table_params, table);
+    % create f
+    [f_name, f] = f_generator(table_params, table);
 
     sigma2s = zeros(1, n_iter); % calculate sigma2 for each iteration
     second_terms= zeros(1, n_iter); % also keep track of each term in the sum
     T1 = matdat_t{1};
     Dens = Density(T1, table);
-    f0_vals = f(matdat_t{1}, matdat_t{2});
+    f0_vals = f(matdat_phi{1}, matdat_t{1}, matdat_phi{2}, matdat_t{2});
     f0_vals(isnan(f0_vals)) = 0; % set NaN tau values to zero to resolve missing data
     % for each iteration
     for i = 1:n_iter
-        % get the current t matrix
+        % get the current matrices
         Ti = matdat_t{i};
+        Pi = matdat_phi{i};
 
         % get the next t's, since these are T^i(t, phi) values
         % with those values, we can compute tau = f(ts, ts1)
         Ti1 = matdat_t{i + 1};
+        Pi1 = matdat_phi{i + 1};
 
-        fi_vals = f(Ti, Ti1);
+        fi_vals = f(Pi, Ti, Pi1, Ti1);
         fi_vals(isnan(fi_vals)) = 0; % set NaN tau values to zero to resolve missing data
         second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation, table);
         sigma2s(i) = sum(second_terms(1:i));
@@ -128,14 +137,14 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     % graph variance first
     figure
     plot([0:(nmax - 1)], var)
-    title(sprintf('Variance for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot([0:(nmax - 1)], terms)
-    title(sprintf('Variance terms for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance terms with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 
     figure
     plot(log(l1) * [0:(nmax - 1)], -log(abs(terms)))
-    title(sprintf('-ln(Variance terms) vs. ln(l1)*k for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
 end
 % TODO: re-run graphs
