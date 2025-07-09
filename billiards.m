@@ -1042,20 +1042,20 @@ for initcondi = handles.initcond
 
     % for each initial condition
     while n<nmax && ~handles.done   %while we have not completed enough iterations and still not done
-        derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
-        derivComp(n,2)=yo;
-        derivComp(n,3)=data(n,3);
-        derivComp(n,4)=data(n,4);
-
-        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
-        n=n+1;
-        drawnow %force Matlab to update the GUI display
-        handles=guidata(gcbo);
-        xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
-        yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
-        ao=data(n-1,2); %horizontal angle of last intersection
-
         try
+            derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
+            derivComp(n,2)=yo;
+            derivComp(n,3)=data(n,3);
+            derivComp(n,4)=data(n,4);
+
+            set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
+            n=n+1;
+            drawnow %force Matlab to update the GUI display
+            handles=guidata(gcbo);
+            xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
+            yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
+            ao=data(n-1,2); %horizontal angle of last intersection
+
             iterate %find the location and angle of the next collision
         catch   %if error in iterate then run the following:
             'iterate error' %error message
@@ -1709,18 +1709,19 @@ for pls_nouse = 1:numel(handles.data)
     derivComp=zeros(nmax,4);
     % for each initial condition
     while n<nmax && ~handles.done && ~isnan(xo)  %while we have not completed enough iterations and still not done and the trajectory isnt already bust
-        derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
-        derivComp(n,2)=yo;
-        derivComp(n,3)=data(n,3);
-        derivComp(n,4)=data(n,4);
-        set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
-        n=n+1;
-        drawnow %force Matlab to update the GUI display
-        handles=guidata(gcbo);
-        xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
-        yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
-        ao=data(n-1,2); %horizontal angle of last intersection
         try
+            derivComp(n,1)=xo;    %x, y, pieces and angular components used in the derivative function
+            derivComp(n,2)=yo;
+            derivComp(n,3)=data(n,3);
+            derivComp(n,4)=data(n,4);
+            set(handles.stopl,'String',[num2str(n),'/',num2str(nmax),' iterations completed, ',num2str(condit_n),'/',num2str(max_condits),' conditions'])  %update display with number of iterations completed
+            n=n+1;
+            drawnow %force Matlab to update the GUI display
+            handles=guidata(gcbo);
+            xo=table{data(n-1,4),1}(data(n-1,1));  %x-value of last intersection
+            yo=table{data(n-1,4),2}(data(n-1,1));  %y-value of last intersection
+            ao=data(n-1,2); %horizontal angle of last intersection
+            
             iterate %find the location and angle of the next collision
         catch   %if error in iterate then run the following:
             'iterate error' %error message
