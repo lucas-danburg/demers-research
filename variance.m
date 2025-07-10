@@ -14,6 +14,8 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     % the 4 is there because we record [t, horizontal angle, incident angle, piece]
     % and we record n t values, n horiz angle values, etc for n iterations.
 
+    clear data; % release objects from memory manually
+
     datamat = datamat(:, [1, 3], :); % trim to only t and incident angle
     % new size: [# of iterations, 2, # of initial conditions]
     [n_iter, tp, n_condit] = size(datamat);
@@ -22,6 +24,8 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     initcondmat = cell2mat(initcond'); % first convert to a 2d array
     % (size = [# of initial conditions, 5 (xo, yo, ao, to, iangleo)])
 
+    clear initcond;
+
     initcondmat = initcondmat(:, [4, 5]); % keep only to and iangle (size = [# init cond, 2])
 
     % now make initcond mat into a 3d array with only one entry for the first dimension
@@ -29,6 +33,8 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     initcondmat_3d(1, :, :) = initcondmat'; % 1st (0th) iteration, both t and iangle, all initial conditions
     % size = [1 (for one iteration), 2 (both t and iangle), # of initial conditions]
     % not sure why the constant transposes are necessary
+
+    clear initcondmat;
 
     datamat = cat(1, initcondmat_3d, datamat); % now prepend the initial conditions
     % to the iteration data along the first dimension (the iteration dimension)
@@ -45,18 +51,20 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     n_ts = generation(1);
     n_iangles = generation(2);
 
+    % pre allocate the loop objects
+    ts_i = zeros(n_iangles * n_ts);
+    iangles_i = zeros(n_iangles * n_ts);
+    Ts_i = zeros(n_iangles, n_ts);
+    Iangles_i = zeros(n_iangles, n_ts);
 
-    matdat = cell(n_iter + 1, n_ts, n_iangles); % initialize a cell array of appropriate shape
     matdat_t = cell(n_iter + 1); % make another one holding actual matrices of t values only
     matdat_phi = cell(n_iter + 1); % make another one holding actual matrices of phi values only
     % also get a matrix of phi values of all the initial conditions, this is needed for the integrals
     Iangles_0 = [];
     for i = 1:(n_iter + 1) % for each iteration + 1
         ts_i = datamat(i, 1, :); % ith iteration, t only, all initial conditions
-        ts_i = ts_i(:); % flatten to a 1d array just in case
 
         iangles_i = datamat(i, 2, :); % same for phi/incident angle
-        iangles_i = iangles_i(:);
 
         % now ts_i and iangles_i are equivalent to
         % `[Ts_i, Iangles_i] = meshgrid(ts, iangles)
@@ -74,17 +82,12 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
             Iangles_0 = Iangles_i;
         end
 
-        % and now array the Ts_i and Iangles_i values into a ts_i x iangles_i meshgrid
-        % where each element is [t, phi]
-        % disclaimer: github copilot generated the following line and i dont know
-        % what UniformOutput or false do
-        M = arrayfun(@(t, phi) [t, phi], Ts_i, Iangles_i, 'UniformOutput', false);
-        Mt = cell2mat(arrayfun(@(t, phi) t, Ts_i, Iangles_i, 'UniformOutput', false));
-        Mp = cell2mat(arrayfun(@(t, phi) phi, Ts_i, Iangles_i, 'UniformOutput', false));
-        matdat{i} = M;
-        matdat_t{i} = Mt;
-        matdat_phi{i} = Mp;
+        matdat_t{i} = Ts_i;
+        matdat_phi{i} = Iangles_i;
     end
+
+    clear ts_i iangles_i Ts_i Iangles_i;
+
     % this good because now we can use this to construct a new cell array with
     % length = # of iterations where each cell is a n_ts x n_iangles matrix
     % and each element of the matrix is the value of an observable f(t, phi).
@@ -95,10 +98,13 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     sigma2s = zeros(1, n_iter); % calculate sigma2 for each iteration
     second_terms= zeros(1, n_iter); % also keep track of each term in the sum
+
     T1 = matdat_t{1};
     Dens = Density(T1, table);
+
     f0_vals = f(matdat_phi{1}, matdat_t{1}, matdat_phi{2}, matdat_t{2});
     f0_vals(isnan(f0_vals)) = 0; % set NaN tau values to zero to resolve missing data
+
     % for each iteration
     for i = 1:n_iter
         % get the current matrices
@@ -112,6 +118,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
         fi_vals = f(Pi, Ti, Pi1, Ti1);
         fi_vals(isnan(fi_vals)) = 0; % set NaN tau values to zero to resolve missing data
+        
         second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation, table);
         sigma2s(i) = sum(second_terms(1:i));
     end
