@@ -12,22 +12,38 @@ L = w - 2*r;      % length of straight segment
 A = pi/2*r;       % length of arc (quarter circle)
 to = 0;           % starting parameter for first arc
 
-% Four initial conditions to avoid infinite horizon case
-if r >= w/2
-    error('Increase width of square or decrease radius of outer/inner circles.');
-end
 
-if r <= w*sqrt(2)/4
-    error('Decrease width of square or increase radius of outer/inner circles.');
+% Four initial conditions to avoid infinite horizon case - Make r or rho big enough
+if delta*(rho) + (1-delta)*rho*pi/4 <= L/2 
+       error('Increase rho, or decrease w or r.');
 end
-
-if delta*(rho) + (1-delta)*rho*pi/4 <= L/2
-   error('Increase rho, or decrease w or r.');
-end    
 
 if delta*rho/sqrt(2) + (1 - delta)*pi/4*rho >= w/2 - r/sqrt(2)
-   error('Decrease rho, Increase w or r')
+       error('Decrease rho, Increase w or r')
 end
+
+if r >= w/2 || r <= w*sqrt(2)/4
+    if r >= w/2
+        error('Increase width of square or decrease radius of outer circles.');
+    end
+    
+    if r <= w*sqrt(2)/4
+        error('Decrease width of square or increase radius of outer circles.');
+    end  
+elseif rho >= w/2 || rho <= w/sqrt(2)/4
+    if rho >= w/2
+        error('Increase width of square or decrease radius of inner circles.');
+    end
+
+    if rho <= w/sqrt(2)/4
+        error('Decrease width of square or increase radius of inner circles.');
+    end
+end
+
+
+
+
+
 
     % 1. Bottom-right arc: center at (w/2, -w/2), angle = pi/2 to pi
 table{1,1} = inline([num2str(w/2), '+', num2str(r), '*cos(pi/2 + (t-', num2str(to), ')/', num2str(r), ')'], 't');  % X(t)
