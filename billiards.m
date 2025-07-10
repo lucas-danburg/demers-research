@@ -1077,7 +1077,7 @@ end
 % if there were multiple initial conditions, automatically calculate and graph
 % the variance and each term in the sum in the variance
 if get(handles.radiobutton9, 'Value')==1
-    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @tau);
+    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
 end
 
 set(handles.stop,'Visible','off')
@@ -1747,7 +1747,7 @@ handles.generation
 % if there were multiple initial conditions, automatically calculate and graph
 % the variance and each term in the sum in the variance
 if get(handles.radiobutton9, 'Value')==1
-    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @tau);
+    [var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
 end
 
 set(handles.stop,'Visible','off')
