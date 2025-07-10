@@ -1,7 +1,7 @@
 function output = f(f_generator)
     % the argument `f_generator` is a function, so when
     % running dataHistogram you have to input the function as
-    % `dataHistogram(filename, delta, @your_function)` with the @
+    % `dataHistogram(@your_function)` with the @
 
     [matfile, dir] = uigetfile('*.mat'); % get file and folder
     file = load([dir, matfile]); % load file from that folder
