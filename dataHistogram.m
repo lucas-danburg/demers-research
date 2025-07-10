@@ -1,4 +1,7 @@
-function output = f(filename, delta)
+function output = f(filename, delta, f_generator)
+    % the argument `f_generator` is a function, so when
+    % running dataHistogram you have to input the function as
+    % `dataHistogram(filename, delta, @your_function)` with the @
     % Let w=5,R=2,rho=1
     w = 5;
     r = 2;
@@ -71,6 +74,9 @@ function output = f(filename, delta)
     data = file.data;
     tbl = file.table;
     initcond = file.initcond;
+
+    % get the observable function
+    [observe_name, observe] = f_generator(file.table_params, tbl);
     
     partTWO = (delta^2*rho/2)*((pi*rho/4)+(rho/2))+delta*(1-delta)*rho^2*(1+pi/4)*(sqrt(2)/2)+(1-delta)^2*(pi^2*rho^2/16);
     partTHREE = -0.5*(delta*rho*(sqrt(2)/2) + (1-delta)*(pi*rho/4))^2;
@@ -83,22 +89,28 @@ function output = f(filename, delta)
     tauBar = pi*area/length;
     array = [];
     filteredArray = [];
-    variance = [];
+    myVariance = [];
     for i = 1: numel(data)
         total = 0;
         x_values = [];
         y_values = [];
         for j = 1:99
+            phi = data{i}(j, 3);
             t = data{i}(j,1);
             piece = data{i}(j,4);
+            phi_next = data{i}(j + 1, 3);
             t_next = data{i}(j+1,1);
             piece_next = data{i}(j+1,4);
             if ~isnan(t) && ~isnan(piece) && ~isnan(t_next) && ~isnan(piece_next)
-                x = table{piece,1}(t);
-                y = table{piece,2}(t);
-                x_next = table{piece_next,1}(t_next);
-                y_next = table{piece_next,2}(t_next);
-                total = total + sqrt((x_next-x)^2+(y_next-y)^2) - tauBar;
+                % adding option for any observable here
+                % total = total + f(phi, t, phi_next, t_next)
+                % where f is some observable function
+                total = total + observe(phi, t, phi_next, t_next);
+                % x = table{piece,1}(t);
+                % y = table{piece,2}(t);
+                % x_next = table{piece_next,1}(t_next);
+                % y_next = table{piece_next,2}(t_next);
+                % total = total + sqrt((x_next-x)^2+(y_next-y)^2) - tauBar;
             end
         end
         average = total/sqrt(99);
@@ -111,7 +123,7 @@ function output = f(filename, delta)
     nxn = size(data,2);
     generation = [n,n,nxn];
     table_params = [w, r, rho, delta];
-    [sigma2s, second_terms] = myVariance(initcond, generation, data, tbl, table_params);
+    [sigma2s, second_terms] = variance(initcond, generation, data, tbl, table_params, f_generator);
     sigma2 = sigma2s(end);  % or pick whichever index you want
     disp(sigma2);
 
@@ -120,7 +132,7 @@ function output = f(filename, delta)
     hold on;
     fplot(@(x)(1000 / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
     fplot(@(x)(1000 / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
-    title(sprintf('Delta = %.2f', delta));
+    title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     hold off;
 
 end
