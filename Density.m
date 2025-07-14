@@ -1,4 +1,4 @@
-function density = D(T, table)
+function density = Density(T, table)
     % function to get a density matrix corresponding to a matrix of t-values
     % this is in case of tables where t is not an arc length parameter
     [n, m] = size(T);

@@ -1,4 +1,4 @@
-function output = f(f_generator)
+function output = dataHistogram(f_generator)
     % the argument `f_generator` is a function, so when
     % running dataHistogram you have to input the function as
     % `dataHistogram(@your_function)` with the @
@@ -54,13 +54,15 @@ function output = f(f_generator)
     table_params = [w, r, rho, delta];
     [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator);
     sigma2 = sigma2s(end);  % or pick whichever index you want
-    disp(sigma2);
+    %disp(sigma2);
 
+    bin_width = 0.5;
     figure;
-    histogram(array)
+    histogram(array, 'BinWidth', bin_width)
     hold on;
-    fplot(@(x)(1000 / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
-    fplot(@(x)(1000 / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
+    norml = generation(3) * bin_width;
+    fplot(@(x)(norml / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
+    fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     hold off;
 
