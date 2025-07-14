@@ -56,13 +56,14 @@ function output = dataHistogram(f_generator)
     sigma2 = sigma2s(end);  % or pick whichever index you want
     %disp(sigma2);
 
-    bin_width = 0.5;
+    bin_width = 0.1;
     figure;
     histogram(array, 'BinWidth', bin_width)
     hold on;
     norml = generation(3) * bin_width;
     fplot(@(x)(norml / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
     fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
+    fplot(@(x)(norml / sqrt((2/3)*pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     hold off;
 
