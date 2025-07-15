@@ -60,7 +60,7 @@ function output = dataHistogram(f_generator)
     sigma2 = sigma2s(end);  % or pick whichever index you want
     %disp(sigma2);
 
-    bin_width = 0.4;
+    bin_width = 0.3;
     figure;
     histogram(array, BinWidth=bin_width)
     hold on;
@@ -69,8 +69,8 @@ function output = dataHistogram(f_generator)
     %fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     %title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     title(sprintf('Histogram with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', observe_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta));
-    xlim([-20, 20])
-    ylim([0, 800])
+    xlim([-10, 10])
+    ylim([0, 120])
     hold off;
 
 end
