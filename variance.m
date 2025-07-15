@@ -119,7 +119,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
         fi_vals = f(Pi, Ti, Pi1, Ti1);
         fi_vals(isnan(fi_vals)) = 0; % set NaN tau values to zero to resolve missing data
         
-        second_terms(i) = E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation, table);
+        second_terms(i) = (1 - i/n_iter) * E(Iangles_0, f0_vals .* fi_vals .* Dens, table_params, generation, table);
         sigma2s(i) = sum(second_terms(1:i));
     end
 

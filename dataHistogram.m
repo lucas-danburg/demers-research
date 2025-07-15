@@ -62,8 +62,7 @@ function output = dataHistogram(f_generator)
     hold on;
     norml = generation(3) * bin_width;
     fplot(@(x)(norml / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
-    fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
-    fplot(@(x)(norml / sqrt((2/3)*pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
+    %fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     hold off;
 
