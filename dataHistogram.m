@@ -13,6 +13,10 @@ function output = dataHistogram(f_generator)
     generation = file.generation;
     table_params = file.table_params;
 
+    n_ts = generation(1);
+    n_iangles = generation(2);
+    n_traj = generation(3);
+
     w = table_params(1);
     r = table_params(2);
     rho = table_params(3);
@@ -56,14 +60,17 @@ function output = dataHistogram(f_generator)
     sigma2 = sigma2s(end);  % or pick whichever index you want
     %disp(sigma2);
 
-    bin_width = 0.1;
+    bin_width = 0.4;
     figure;
-    histogram(array, 'BinWidth', bin_width)
+    histogram(array, BinWidth=bin_width)
     hold on;
-    norml = generation(3) * bin_width;
+    norml = n_traj * bin_width;
     fplot(@(x)(norml / sqrt(2*pi*sigma2)) * exp(-(x).^2 / (2*sigma2)),[min(array) max(array)]);
     %fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
-    title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
+    %title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
+    title(sprintf('Histogram with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', observe_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta));
+    xlim([-20, 20])
+    ylim([0, 800])
     hold off;
 
 end
