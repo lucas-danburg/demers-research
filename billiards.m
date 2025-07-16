@@ -1077,6 +1077,7 @@ end
 % if there were multiple initial conditions, automatically calculate and graph
 % the variance and each term in the sum in the variance
 if get(handles.radiobutton9, 'Value')==1
+    databutton_Callback(h, eventdata, handles, varargin)
     %[var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
 end
 
@@ -1108,7 +1109,13 @@ set(handles.nmore,'Visible','on')
 set(handles.analysis,'Visible','on')
 set(handles.databox,'Visible','on')
 
-
+% if there were multiple initial conditions, automatically calculate and graph
+% the variance and each term in the sum in the variance
+if get(handles.radiobutton9, 'Value')==1
+    set(handles.radio1, 'Value', 1)
+    databutton_Callback(h, eventdata, handles, varargin)
+    %[var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
+end
 
 % --------------------------------------------------------------------
 function varargout = stop_Callback(h, eventdata, handles, varargin)
@@ -1439,7 +1446,7 @@ case 1  %Type of data:  Raw Data (t, horizontal, incident, piece)
         initcond=handles.initcond;
         generation = handles.generation;
         table_params = handles.table_params;
-        save(uiputfile,'data','table','initcond', 'generation', 'table_params')   %save prompt
+        save(uiputfile('*.mat'),'data','table','initcond', 'generation', 'table_params')   %save prompt
     end
     if get(handles.radio2,'Value')==1   %export data to command window
         if size(data,2)==1  %if single initial conditions just display data
@@ -1744,12 +1751,6 @@ size(handles.data)
 size(handles.data{1})
 handles.generation
 
-% if there were multiple initial conditions, automatically calculate and graph
-% the variance and each term in the sum in the variance
-if get(handles.radiobutton9, 'Value')==1
-    %[var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
-end
-
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
 set(handles.frame3,'Visible','on')
@@ -1777,6 +1778,15 @@ set(handles.more,'Visible','on')
 set(handles.nmore,'Visible','on')
 set(handles.analysis,'Visible','on')
 set(handles.databox,'Visible','on')
+
+% if there were multiple initial conditions, automatically calculate and graph
+% the variance and each term in the sum in the variance
+if get(handles.radiobutton9, 'Value')==1
+    %[var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
+    set(handles.radio1, 'Value', 1)
+    databutton_Callback(h, eventdata, handles, varargin)
+end
+
 % --------------------------------------------------------------------
 function movieview_Callback(hObject, eventdata, handles)
 %turn off other radio buttons if view button is pressed
