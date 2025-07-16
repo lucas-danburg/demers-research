@@ -55,12 +55,15 @@ function output = dataHistogram(f_generator)
     end
 
     disp('did averages, doing variance now')
+    disp('select the folder to put graphs in')
+    savefolder = uigetdir('', 'Select a folder to put the plots/graphs in:');
+
     table_params = [w, r, rho, delta];
-    [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator);
+    [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator, savefolder);
     sigma2 = sigma2s(end);  % or pick whichever index you want
     %disp(sigma2);
 
-    bin_width = 0.3;
+    bin_width = 0.4;
     figure;
     histogram(array, BinWidth=bin_width)
     hold on;
@@ -69,8 +72,8 @@ function output = dataHistogram(f_generator)
     %fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     %title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
     title(sprintf('Histogram with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', observe_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta));
-    xlim([-10, 10])
-    ylim([0, 120])
+    xlim([-15, 15])
+    ylim([0, 300])
+    savefig([savefolder, '/', sprintf('histo%0.2fD.fig', delta)])
     hold off;
-
 end

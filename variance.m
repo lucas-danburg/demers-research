@@ -1,4 +1,4 @@
-function [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator)
+function [sigma2s, second_terms] = variance(initcond, generation, data, table, table_params, f_generator, savefolder)
     % data is the handles.data object
     % initcond is the handles.initcond object
     % generation is the handles.generation object
@@ -144,17 +144,20 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     % graph variance first
     figure
     plot([0:(nmax - 1)], var)
-    ylim([-2, 8])
+    ylim([-2, 18])
     title(sprintf('Variance with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    savefig([savefolder, '/', sprintf('var%0.2fD.fig', delta)])
 
     figure
     plot([0:(nmax - 1)], terms)
     ylim([-0.2, 1.2])
     title(sprintf('Variance terms with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    savefig([savefolder, '/', sprintf('terms%0.2fD.fig', delta)])
 
     figure
     plot(log(l1) * [0:(nmax - 1)], -log(abs(terms)))
     ylim([-2, 15])
     title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    savefig([savefolder, '/', sprintf('log%0.2fD.fig', delta)])
 end
 % TODO: re-run graphs
