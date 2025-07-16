@@ -1074,13 +1074,6 @@ for initcondi = handles.initcond
 end
 % END FOR LOOP
 
-% if there were multiple initial conditions, automatically calculate and graph
-% the variance and each term in the sum in the variance
-if get(handles.radiobutton9, 'Value')==1
-    databutton_Callback(h, eventdata, handles, varargin)
-    %[var, terms] = variance(handles.initcond, handles.generation, handles.data, handles.table, handles.table_params, @phi_ones);
-end
-
 set(handles.stop,'Visible','off')
 set(handles.stopl,'Visible','off')
 set(handles.frame3,'Visible','on')
