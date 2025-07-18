@@ -143,21 +143,33 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
 
     % graph variance first
     figure
-    plot([0:(nmax - 1)], var)
+    plot([0:(nmax - 1)], var, 'LineWidth', 4)
+    ax = gca;
+    ax.LineWidth = 2;
+    ax.FontSize = 14;
     ylim([-2, 18])
-    title(sprintf('Variance with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('var%0.2fD.fig', delta)])
+    saveas(gcf, [savefolder, '/', sprintf('var%0.2fD.png', delta)])
 
     figure
-    plot([0:(nmax - 1)], terms)
+    plot([0:(nmax - 1)], terms, 'LineWidth', 4)
+    ax = gca;
+    ax.LineWidth = 2;
+    ax.FontSize = 14;
     ylim([-0.2, 1.2])
-    title(sprintf('Variance terms with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('Variance terms with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('terms%0.2fD.fig', delta)])
+    saveas(gcf, [savefolder, '/', sprintf('terms%0.2fD.png', delta)])
 
     figure
-    plot(log(l1) * [0:(nmax - 1)], -log(abs(terms)))
+    plot(log(l1) * [0:(nmax - 1)], -log(abs(terms)), 'LineWidth', 4)
+    ax = gca;
+    ax.LineWidth = 2;
+    ax.FontSize = 14;
     ylim([-2, 15])
-    title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta))
+    title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('log%0.2fD.fig', delta)])
+    saveas(gcf, [savefolder, '/', sprintf('log%0.2fD.png', delta)])
 end
 % TODO: re-run graphs
