@@ -147,8 +147,8 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     ax = gca;
     ax.LineWidth = 2;
     ax.FontSize = 14;
-    ylim([-2, 18])
-    title(sprintf('Variance with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
+    %ylim([-2, 18])
+    title(sprintf('Variance with f=%s for %d x %d grid (%d successful), delta = %0.2f', f_name, n_ts, n_iangles, n_traj, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('var%0.2fD.fig', delta)])
     saveas(gcf, [savefolder, '/', sprintf('var%0.2fD.png', delta)])
 
@@ -158,7 +158,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     ax.LineWidth = 2;
     ax.FontSize = 14;
     ylim([-0.2, 1.2])
-    title(sprintf('Variance terms with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
+    title(sprintf('Variance terms with f=%s for %d x %d grid (%d successful), delta = %0.2f', f_name, n_ts, n_iangles, n_traj, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('terms%0.2fD.fig', delta)])
     saveas(gcf, [savefolder, '/', sprintf('terms%0.2fD.png', delta)])
 
@@ -168,7 +168,7 @@ function [sigma2s, second_terms] = variance(initcond, generation, data, table, t
     ax.LineWidth = 2;
     ax.FontSize = 14;
     ylim([-2, 15])
-    title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', f_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15)
+    title(sprintf('-ln(Variance terms) vs. ln(l1)*k with f=%s for %d x %d grid (%d successful), delta = %0.2f', f_name, n_ts, n_iangles, n_traj, delta), 'FontSize', 15)
     savefig([savefolder, '/', sprintf('log%0.2fD.fig', delta)])
     saveas(gcf, [savefolder, '/', sprintf('log%0.2fD.png', delta)])
 end

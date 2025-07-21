@@ -74,7 +74,7 @@ function output = dataHistogram(f_generator)
     ax.FontSize = 14;
     %fplot(@(x)(norml / sqrt(pi*sigma2)) * exp(-(x).^2 / (sigma2)),[min(array) max(array)]);
     %title(sprintf('Delta = %.2f, observable: %s', delta, observe_name));
-    title(sprintf('Histogram with f=%s for %d x %d grid (%d attempted, %d successful), w = %d, R = %d, rho = %d, delta = %0.2f', observe_name, n_ts, n_iangles, n_ts * n_iangles, n_traj, w, r, rho, delta), 'FontSize', 15);
+    title(sprintf('Histogram with f=%s for %d x %d grid (%d successful), delta = %0.2f', observe_name, n_ts, n_iangles, n_traj, delta), 'FontSize', 15);
     xlim([-15, 15])
     ylim([0, 300])
     savefig([savefolder, '/', sprintf('histo%0.2fD.fig', delta)])
