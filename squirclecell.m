@@ -137,7 +137,8 @@ else
 
 hold on;
 for n=1:12
-ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
+h = ezplot(table{n,1}, table{n,2}, [table{n,3}, table{n,4}]);
+set(h, 'LineWidth', 2);
 end
 axis equal
 hold off
